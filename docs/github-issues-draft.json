@@ -1,0 +1,218 @@
+[
+  {
+    "id": "DB-1",
+    "title": "[DB-1] 로컬 PostgreSQL 17 인스턴스 준비 및 접속 확인",
+    "area": "db",
+    "priority": "must",
+    "dependsOn": [],
+    "done": true,
+    "body": "## 작업 내용\n로컬 개발용 PostgreSQL 17 준비 및 기본 데이터베이스 설정\n- PostgreSQL 17 설치(기존 설치 또는 Docker `postgres:17`) 또는 기존 인스턴스 확인\n- `todolist_dev` DB 생성\n- 애플리케이션 전용 사용자 발급\n- 접속 정보를 `.env.example` 포맷으로 정리\n\n## 관련 문서\n- **ERD (6-erd.md)**: PostgreSQL 17 타입 선택 근거 및 테이블 설계 기준\n- **아키텍처 다이어그램 (5-arch-diagram.md)**: 백엔드가 pg Pool을 통해 DB와 통신하는 구조\n- **프로젝트 구조 (4-project-structure.md)**: `backend/src/config/db.pool.js`에서 사용할 커넥션 정보\n\n## 의존성\n착수 시작점 — 의존 없음\n\n## 완료 조건\n- [x] `psql -h localhost -U <app_user> -d todolist_dev -c '\\conninfo'` 접속 성공\n- [x] `SELECT version();` 결과에 PostgreSQL 17.x 표기 확인\n- [x] `.env.example`에 DB 접속 키가 placeholder로 커밋, 실제 `.env`는 `.gitignore` 포함"
+  },
+  {
+    "id": "DB-2",
+    "title": "[DB-2] 마이그레이션 러너 및 migrations/ 디렉토리 구성",
+    "area": "db",
+    "priority": "must",
+    "dependsOn": ["DB-1"],
+    "done": true,
+    "body": "## 작업 내용\n마이그레이션 인프라 구축 및 스크립트 관리 구조 확정\n- `migrations/` 디렉토리 생성\n- 경량 마이그레이션 러너(`node-pg-migrate` 등) 도입\n- `migrate:up`/`migrate:down` npm 스크립트 추가\n- 파일 네이밍(`001_create_users.sql` 등) 및 up/down 구조 확정\n\n## 관련 문서\n- **프로젝트 구조 (4-project-structure.md)**: 6.2절 백엔드 마이그레이션 관리 원칙 및 디렉토리 구조 `backend/migrations/` 참조\n- **실행계획 (7-execution-plan.md)**: 2장 DB-3 완료 조건에서 파일명 포맷(4자리 `0001~0003_*.sql`) 명시\n\n## 의존성\nDB-1 완료 필요. BE-1(`package.json` 생성)과 상호 조율 필요 — BE-1이 DB-2를 기다림\n\n## 완료 조건\n- [x] `migrations/` 디렉토리 및 네이밍 규칙 문서화(README/주석)\n- [x] `npm run migrate:up`/`migrate:down`이 빈 상태에서 오류 없이 실행\n- [x] 러너의 자체 관리 테이블(`pgmigrations` 등) 생성을 `\\dt`로 확인"
+  },
+  {
+    "id": "DB-3",
+    "title": "[DB-3] 스키마 마이그레이션 작성 및 적용 (schema.sql → 001~003 분할)",
+    "area": "db",
+    "priority": "must",
+    "dependsOn": ["DB-1", "DB-2"],
+    "done": true,
+    "body": "## 작업 내용\n릴레이셔널 스키마 구현 및 제약조건 적용\n- `schema.sql`을 `001_create_users.sql`/`002_create_categories.sql`/`003_create_todos.sql`로 분할 (각 up/down)\n- 도메인 정의서의 엔티티(users, categories, todos)를 ERD 스펙에 따라 구현\n- 기본 카테고리 시딩은 별도 마이그레이션이 아니라 회원가입 API 트랜잭션(BE-2)에서 처리한다는 정책 명시\n- 각 파일 down 스크립트 작성\n- `migrate:up`→`down`→`up` 왕복 검증\n\n## 관련 문서\n- **ERD (6-erd.md)**: users, categories, todos 테이블 정의, CHECK 제약(`end_date >= start_date`), 유니크 제약(`categories.uq_categories_user_id_name`, `uq_categories_user_id_default`), 인덱스 정책\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 2(기본 카테고리 자동 적용), 규칙 3(종료일자 유효성), 규칙 7(카테고리 삭제 시 할일 이관)\n- **프로젝트 구조 (4-project-structure.md)**: 6.2절 마이그레이션 원칙\n\n## 의존성\nDB-1, DB-2 완료 필요. BE-2(회원가입 API에서 기본 카테고리 생성)가 이 Task의 완료(기본 카테고리 정책 확정)를 기다림\n\n## 완료 조건\n- [x] `migrations/001~003_*.sql`(up/down) 존재 (실제 파일명은 node-pg-migrate index 포맷 4자리: `0001~0003_*.sql`)\n- [x] `migrate:up` 후 `\\d`로 `users`/`categories`/`todos` 3개 테이블 존재 확인\n- [x] `\\d todos`로 `ck_todos_end_date_after_start` CHECK 및 3개 인덱스 존재 확인\n- [x] `\\d categories`로 `uq_categories_user_id_name`, `uq_categories_user_id_default`(부분 유니크) 존재 확인\n- [x] `migrate:down`→`migrate:up` 재실행 오류 없이 성공(왕복 가능 확인)\n- [x] \"기본 카테고리는 회원가입 트랜잭션에서 생성\"이라는 정책이 커밋 메시지/주석으로 명시되어 BE가 참조 가능"
+  },
+  {
+    "id": "DB-4",
+    "title": "[DB-4] pg Pool 커넥션 설정값 확정 및 검증",
+    "area": "db",
+    "priority": "must",
+    "dependsOn": ["DB-1"],
+    "done": true,
+    "body": "## 작업 내용\nPostgreSQL 커넥션 풀 설정 및 성능 최적화\n- `max`, `idleTimeoutMillis`, `connectionTimeoutMillis` 등 설정값 확정\n- PRD 6.1(성능 요구사항: 1000명 동시접속 대응 아키텍처) 반영\n- 근거 문서화\n- 임시 스크립트로 Pool 생성 후 `SELECT 1` 검증\n\n## 관련 문서\n- **PRD (2-PRD.md)**: 6.1절 성능 요구사항, 커넥션 풀링 전략\n- **프로젝트 구조 (4-project-structure.md)**: 6.2절 DB 커넥션 풀 설정 및 1000명 동시접속 대응 설계 원칙\n\n## 의존성\nDB-1 완료 필요. DB-2/DB-3과 병렬 가능. BE-2(백엔드 pg Pool 세팅)가 DB-4를 기다림\n\n## 완료 조건\n- [x] `max`/`idleTimeoutMillis`/`connectionTimeoutMillis` 값이 문서화됨\n- [x] 검증 스크립트에서 `SELECT 1` 성공 응답\n- [x] `pool.end()` 시 커넥션 정상 반환/종료 확인(누수 없음)"
+  },
+  {
+    "id": "DB-5",
+    "title": "[DB-5] 인덱스 및 제약조건 존재 검증",
+    "area": "db",
+    "priority": "should",
+    "dependsOn": ["DB-3"],
+    "done": true,
+    "body": "## 작업 내용\n데이터베이스 성능 최적화 인덱스 검증\n- DB-3에서 적용된 인덱스/제약이 실제 쿼리 패턴(FR-5 필터링)에 부합하는지 `pg_indexes` 조회로 확인\n- ERD 명세와 실제 DB 구조 대조\n\n## 관련 문서\n- **ERD (6-erd.md)**: 타입 선택 근거 및 핵심 제약조건 및 정책(user_id 기반 필터링, 소유자 검증)\n- **PRD (2-PRD.md)**: FR-5 필터 성능(카테고리/상태 동시 AND 필터링)\n- **실행계획 (7-execution-plan.md)**: 완료 조건에서 인덱스 3개 확인, `indexdef` 검증 포함\n\n## 의존성\nDB-3 완료 필요. Critical path 아님(시간 없으면 축소 가능)\n\n## 완료 조건\n- [x] `pg_indexes` 조회 결과에 `todos`용 인덱스 3개 모두 표시\n- [x] 각 인덱스 선행 컬럼이 `user_id`임을 `indexdef`로 확인\n- [x] `\\d+` 출력과 `docs/6-erd.md`의 제약조건 대조 완료"
+  },
+  {
+    "id": "DB-6",
+    "title": "[DB-6] (여력 시) 시드/테스트 데이터 스크립트 및 핸드오프 노트",
+    "area": "db",
+    "priority": "could",
+    "dependsOn": ["DB-3", "DB-4"],
+    "done": true,
+    "body": "## 작업 내용\n개발/QA 및 핸드오프를 위한 테스트 데이터 준비\n- 개발/QA용 최소 시드 데이터 작성\n- 기본 카테고리는 회원가입과 동일 순서로 생성\n- 접속정보/마이그레이션 실행법/Pool 설정값/기본 카테고리 정책을 커밋 메시지 등으로 인계\n\n## 관련 문서\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 2(모든 사용자가 암묵적으로 기본 카테고리 보유)\n- **사용자 시나리오 (3-user-scenario.md)**: P1/P2/P3 페르소나별 테스트 시나리오(과제, 스터디, 마케팅 캠페인 등 카테고리 예시)\n\n## 의존성\nDB-3, DB-4 완료 필요. BE-3~BE-5가 참조하나 필수는 아님(스킵 가능)\n\n## 완료 조건\n- [x] 시드 스크립트 실행 후 `users` row 존재 확인\n- [x] 시드된 각 사용자에 `is_default=true` 카테고리가 정확히 1개씩 존재(그룹별 count=1 쿼리로 확인)\n- [x] 핸드오프 노트에 접속정보/마이그레이션 명령/Pool 값/기본 카테고리 정책 모두 언급"
+  },
+  {
+    "id": "BE-1",
+    "title": "[BE-1] 프로젝트 초기 세팅 및 공통 인프라",
+    "area": "be",
+    "priority": "must",
+    "dependsOn": ["DB-1"],
+    "done": false,
+    "body": "## 작업 내용\n백엔드 REST API 프레임워크 및 공통 인프라 구축\n- Express 앱 조립, `helmet`, CORS(프론트 오리진만 허용)\n- 디렉토리 구조 생성: `src/{config,routes,controllers,services,repositories,domain,middlewares,utils,validators}`\n- `config/env.js`(fail fast 환경변수 검증), `config/db.pool.js`(pg.Pool 인스턴스)\n- 공통 미들웨어(`error-handler`, `async-handler`, `auth.middleware` 뼈대)\n- 유틸리티: `utils/{app-error, case-mapper, with-transaction, logger}`\n- `.env.example` 작성\n- Health check 엔드포인트(`GET /api/v1/health`)\n\n## 관련 문서\n- **프로젝트 구조 (4-project-structure.md)**: 3.1절 백엔드 레이어(Router→Controller→Service→Repository→DB), 6.2절 에러 핸들링/로깅/CORS 설정, 7장 백엔드 디렉토리 구조\n- **아키텍처 다이어그램 (5-arch-diagram.md)**: 2장 백엔드 계층 구조도\n- **PRD (2-PRD.md)**: 6.1절 1000명 동시접속 stateless 아키텍처\n\n## 의존성\nDB-1(접속정보) 필요. DB-2와 `package.json`/마이그레이션 스크립트 위치 상호 조율\n\n## 완료 조건\n- [ ] `node src/server.js` 정상 기동, 포트 로그 출력\n- [ ] 필수 환경변수 누락 시 기동 즉시 실패(fail fast) + 명확한 에러 로그\n- [ ] `GET /api/v1/health` 200 응답 및 DB 커넥션 획득 성공 확인\n- [ ] 임시 예외 라우트 호출 시 error-handler가 일관된 JSON 에러 포맷 응답, stack trace 미노출\n- [ ] 허용되지 않은 Origin 요청 CORS 차단 확인"
+  },
+  {
+    "id": "BE-2",
+    "title": "[BE-2] 인증 API (FR-1 회원가입, FR-2 로그인/JWT)",
+    "area": "be",
+    "priority": "must",
+    "dependsOn": ["BE-1", "DB-3", "DB-4"],
+    "done": false,
+    "body": "## 작업 내용\n사용자 인증 시스템 구현 (회원가입, 로그인, JWT, 미들웨어)\n- `auth.{repository,service,controller,routes}.js`, `validators/auth.schema.js` 작성\n- 회원가입 성공 시 트랜잭션으로 `users` insert + `is_default=true` 카테고리 자동 생성 (DB-3 정책 반영)\n- 로그인: bcrypt 비교, JWT 발급(1~2시간), 실패 시 통합 에러 메시지\n- `auth.middleware.js` 완성(JWT 검증, `req.user` 주입, 401)\n- 로그아웃: 클라이언트 토큰 폐기 방식 (서버 블랙리스트 없음)\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-1 회원가입(이메일/비밀번호/닉네임, 중복 방지, bcrypt 해시), FR-2 로그인(계정 존재 여부 비노출, 토큰 발급, 1~2시간 짧은 만료), 6.2절 보안 요구사항\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 1(인증 필수), 규칙 2(기본 카테고리 자동 생성)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 회원가입 흐름, E-8 로그인 실패 시 일반화 메시지\n- **프로젝트 구조 (4-project-structure.md)**: 3.1절 트랜잭션 처리, 6.2절 CORS/보안, stateless JWT 인증\n\n## 의존성\nBE-1, DB-3(스키마 적용 완료) 필요, DB-4(Pool 설정값) 필요\n\n## 완료 조건\n- [ ] 회원가입 성공 시 201 + `users`/`categories`(`is_default=true`) row 동시 생성 확인\n- [ ] 이메일 중복 시 409/400, 추가 row 생성 안 됨\n- [ ] 필수값/형식 오류 시 400\n- [ ] 비밀번호가 bcrypt 해시로 저장됨을 DB 조회로 확인\n- [ ] 로그인 성공 시 200 + JWT 반환\n- [ ] 잘못된 이메일/비밀번호 모두 동일 메시지로 401(계정 존재 여부 비노출)\n- [ ] 토큰 없이/위조 토큰으로 보호 라우트 호출 시 401\n- [ ] 정상 JWT로 `req.user.id` 주입 확인"
+  },
+  {
+    "id": "BE-3",
+    "title": "[BE-3] 카테고리 API (FR-8 Must / FR-9 Should)",
+    "area": "be",
+    "priority": "must",
+    "dependsOn": ["BE-2"],
+    "done": false,
+    "body": "## 작업 내용\n카테고리 관리 API (생성, 수정, 삭제, 기본 카테고리 보호)\n- `category.{repository,service,controller,routes}.js`, `validators/category.schema.js` 작성\n- 삭제 시 `with-transaction.js`로 \"소속 todos 이관 → 카테고리 삭제\" 원자적 처리\n- 기본 카테고리 수정/삭제 명시적 차단(E-4)\n- 모든 쿼리에 소유자 조건 필수(FR-10)\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-8 카테고리 생성(이름 중복 방지 권장), FR-9 수정/삭제(기본 카테고리 삭제 불가, 삭제 시 할일 자동 이관)\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 7(카테고리 삭제 시 할일 이관, 기본 카테고리), 3.2절 카테고리 엔티티\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 카테고리 생성, 3.3 P3 카테고리 수정/삭제(자동 이관 확인), E-3/E-4 예외 시나리오\n- **프로젝트 구조 (4-project-structure.md)**: 3.1절 트랜잭션 처리, 소유자 검증 404 처리\n- **와이어프레임 (8-wireframe.md)**: S5 카테고리 관리 화면(기본 카테고리 수정/삭제 UI 비노출, 삭제 컨펌)\n\n## 의존성\nBE-2 완료 필요\n\n## 완료 조건\n- [ ] 카테고리 생성 시 201 + row 생성(`is_default=false`)\n- [ ] 동일 이름 재생성 시 409\n- [ ] 이름 수정 시 200 + DB 반영\n- [ ] 기본 카테고리 수정/삭제 요청 시 400/403으로 거부\n- [ ] 삭제 시 소속 todos의 `category_id`가 기본 카테고리로 이관되고 카테고리 row 삭제됨(트랜잭션 원자성 오류 주입 테스트 포함)\n- [ ] 타 사용자 소유 카테고리 접근 시 404\n- [ ] 미인증 요청 401"
+  },
+  {
+    "id": "BE-4",
+    "title": "[BE-4] 할일 CRUD API (FR-4, FR-6, FR-7)",
+    "area": "be",
+    "priority": "must",
+    "dependsOn": ["BE-2", "BE-3"],
+    "done": false,
+    "body": "## 작업 내용\n할일 생성, 읽기, 수정, 삭제 API 구현\n- `todo.{repository,service,controller,routes}.js`, `validators/todo.schema.js` 작성\n- `end_date >= start_date` 애플리케이션 사전 검증\n- 카테고리 미지정 시 기본 카테고리 자동 적용(도메인 규칙 2)\n- 완료 여부(Boolean) 토글\n- 소유자 검증 전 쿼리 적용(FR-10)\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-4 할일 등록(제목/설명/카테고리/시작일자/종료일자, 종료일자 ≥ 시작일자, 미지정 시 기본 적용), FR-6 수정(완료 여부 변경 포함), FR-7 삭제(컨펌 UI)\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 2(기본 카테고리 자동 적용), 규칙 3(종료일자 유효성), 규칙 6(완료 여부 우선순위)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 할일 등록(카테고리 미지정), 3.2 P2 수정, E-1 날짜 유효성, E-2 카테고리 미지정\n- **ERD (6-erd.md)**: todos 테이블, CHECK 제약(`end_date >= start_date`), `is_completed`, `completed_at` 컬럼\n- **프로젝트 구조 (4-project-structure.md)**: 3.1절 소유자 검증, 쿼리 작성 원칙\n\n## 의존성\nBE-2, BE-3 완료 필요\n\n## 완료 조건\n- [ ] 등록 성공 시 201 + row 생성\n- [ ] 카테고리 미지정 시 기본 카테고리 자동 적용 확인\n- [ ] 종료일자<시작일자 시 400 및 미저장(E-1)\n- [ ] 수정 시 200 + DB 반영, `updated_at` 갱신\n- [ ] 삭제 시 204/200 + row 삭제\n- [ ] 타 사용자 소유 todo 접근 시 404(FR-10)\n- [ ] 존재하지 않는 category_id 등록 시 400/404"
+  },
+  {
+    "id": "BE-5",
+    "title": "[BE-5] 할일 목록 조회 API — 상태 파생 + 필터 + 페이지네이션 (FR-5)",
+    "area": "be",
+    "priority": "must",
+    "dependsOn": ["BE-4"],
+    "done": false,
+    "body": "## 작업 내용\n할일 목록 조회, 상태 파생 계산, 필터링, 페이지네이션\n- `domain/todo-status.js` 순수 함수 작성(4개 상태 계산, 서버 UTC 기준)\n- 시작 전(미완료 ∧ 현재일 < 시작일), 진행중(미완료 ∧ 시작일 ≤ 현재일 ≤ 종료일), 완료(완료 처리), 기한초과(미완료 ∧ 현재일 > 종료일)\n- 목록 쿼리에 카테고리/상태 조건 AND 결합(FR-5), `LIMIT/OFFSET`으로 페이지네이션\n- 응답에 파생 status 및 페이지네이션 메타 포함\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-5 필터(카테고리+상태 동시 AND), 페이지네이션, 완료 우선순위(완료되면 기한초과 무관하게 '완료')\n- **도메인 정의서 (1-domain-definition.md)**: 4장 할일 상태 정의(시작전/진행중/완료/기한초과 판단 기준), 규칙 6(완료 우선순위)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 필터 사용, 3.2 P2 카테고리+상태 동시 필터, E-6 완료 처리된 할일은 기한초과 무관 '완료'\n- **프로젝트 구조 (4-project-structure.md)**: 2.3절 파생 로직 순수 함수화 원칙\n\n## 의존성\nBE-4 완료 필요\n\n## 완료 조건\n- [ ] 본인 소유 todo만 반환 확인\n- [ ] categoryId+status 동시 지정 시 AND 필터링 정확히 동작\n- [ ] 완료 처리된 todo는 기한초과와 무관하게 'completed' 반환(E-6)\n- [ ] 경계값(시작일=오늘→진행중, 종료일=오늘→진행중) 테스트 통과\n- [ ] 응답에 페이지네이션 메타 포함, limit/page 동작 확인\n- [ ] 필터 미지정 시 전체 목록(페이지네이션 적용) 반환"
+  },
+  {
+    "id": "BE-6",
+    "title": "[BE-6] 접근 제어 통합 점검 + 핵심 로직 단위 테스트",
+    "area": "be",
+    "priority": "should",
+    "dependsOn": ["BE-2", "BE-3", "BE-4", "BE-5"],
+    "done": false,
+    "body": "## 작업 내용\n보안 및 로직 검증\n- 전 엔드포인트의 `user_id` 조건 적용 여부 코드 리뷰\n- `tests/unit/{todo-status, date-validation, ownership}.test.js` 작성\n- (선택) `tests/integration/happy-path.test.js` 통합 테스트\n\n## 관련 문서\n- **프로젝트 구조 (4-project-structure.md)**: 5장 테스트 원칙(도메인 규칙과 직결된 순수 로직 위주, 할일 상태/날짜 유효성/소유자 검증)\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 4(소유자만 접근, 404 처리), 규칙 6(상태 우선순위)\n- **PRD (2-PRD.md)**: 4.3절 테스트 범위(핵심 로직 위주 최소 검증)\n\n## 의존성\nBE-2~BE-5 완료 필요\n\n## 완료 조건\n- [ ] `npm test` 전체 통과\n- [ ] todo-status 테스트에 4개 상태 경계값 케이스 모두 포함 및 통과\n- [ ] Repository 쿼리 전수에 `user_id` 조건 존재 확인(누락 시 즉시 수정)\n- [ ] (선택) happy-path 통합 테스트 통과"
+  },
+  {
+    "id": "BE-7",
+    "title": "[BE-7] (Should — 여력 시) 계정 정보 수정 API (FR-3)",
+    "area": "be",
+    "priority": "should",
+    "dependsOn": ["BE-2"],
+    "done": false,
+    "body": "## 작업 내용\n사용자 계정 정보 변경 API\n- `user.repository.js` update 메서드 작성\n- 닉네임/비밀번호 변경 로직\n- `PATCH /api/v1/users/me` 엔드포인트\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-3 계정 정보 수정(닉네임, 비밀번호 변경, 최소 길이 정책)\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 5(사용자가 자신의 계정 정보 수정 가능)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.3 P3 닉네임/비밀번호 변경\n\n## 의존성\nBE-2 완료 필요. 일정 지연 시 최우선 축소 대상\n\n## 완료 조건\n- [ ] 닉네임 변경 200 + DB 반영\n- [ ] 비밀번호 최소 길이 미달 시 400\n- [ ] 비밀번호 변경 후 신규 비밀번호로만 재로그인 성공\n- [ ] 미인증 요청 401"
+  },
+  {
+    "id": "BE-8",
+    "title": "[BE-8] (Should — 여력 시) 완료일시 자동 기록(FR-11) + 배포 준비",
+    "area": "be",
+    "priority": "should",
+    "dependsOn": ["BE-4", "BE-1", "BE-2", "BE-3", "BE-5", "DB-3"],
+    "done": false,
+    "body": "## 작업 내용\n완료 처리 시 완료일시 기록 및 배포 준비\n- 완료 토글 시 `completed_at` 자동 기록/초기화(FR-11)\n- 배포용 설정(NODE_ENV=production, graceful shutdown, CORS 최종 점검)\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-11 완료일시 자동 기록(Should, 도메인 정의서 3.3 TodoList 속성), 6.3절 가용성/안정성, 배포 환경 고려\n- **도메인 정의서 (1-domain-definition.md)**: 3.3절 할일 엔티티 `completed_at` 속성\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 완료 처리 시 완료일시 기록, 3.3 P3 완료일시 확인, E-6 완료 우선순위\n\n## 의존성\nFR-11은 BE-4 필요. 배포 준비는 BE-1~BE-6(Must 전체) 완료 후. DB-3(운영/스테이징 마이그레이션 적용) 필요\n\n## 완료 조건\n- [ ] 완료 전환 시 `completed_at` 기록, 완료 해제 시 NULL 초기화\n- [ ] 목록 응답에 `completedAt` 포함\n- [ ] 프로덕션 모드에서 stack trace 미노출\n- [ ] 배포 대상 환경에서 정상 기동 및 health check 통과\n- [ ] SIGTERM 시 정상 종료(DB 커넥션 정리) 확인"
+  },
+  {
+    "id": "FE-1",
+    "title": "[FE-1] 프로젝트 초기 세팅 및 공통 인프라",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": [],
+    "done": false,
+    "body": "## 작업 내용\n프론트엔드 React 애플리케이션 초기 구축\n- Vite+React 19+TS, `tsconfig`(strict, `@/` alias), React Router 셋업\n- Zustand, TanStack Query 의존성 추가 및 프로바이더 구성\n- `api/client.ts`(인터셉터 골격), `.env`(`VITE_API_BASE_URL`)\n- `shared/layout/{AppLayout, ProtectedRoute}`, `shared/components/{Button,Input,Modal,ConfirmDialog,LoadingSpinner,ErrorMessage,EmptyState}`\n- ErrorBoundary, `styles/globals.css`, Vitest+RTL 셋업\n\n## 관련 문서\n- **프로젝트 구조 (4-project-structure.md)**: 3.2절 프론트엔드 레이어(components→hooks→queries/stores/lib→api), 8장 프론트엔드 디렉토리 구조, 6.3절 API 베이스 URL 관리\n- **아키텍처 다이어그램 (5-arch-diagram.md)**: 1장 전체 시스템(SPA ↔ REST API), JWT 인증 흐름\n- **PRD (2-PRD.md)**: 7.1절 기술 스택(React 19, Zustand, TanStack Query)\n\n## 의존성\n없음(최우선 착수, 백엔드 무관)\n\n## 완료 조건\n- [ ] `npm run dev` 정상 기동, `tsc --noEmit`/`eslint` 통과\n- [ ] `QueryClientProvider`/`BrowserRouter` 구성 및 라우팅 확인\n- [ ] 요청 인터셉터의 토큰 자동 부착 단위 확인\n- [ ] `ProtectedRoute`가 미인증 시 `/login`으로 리다이렉트\n- [ ] 공통 컴포넌트(Loading/Error/Empty) 렌더링 확인\n- [ ] Vitest 샘플 테스트 통과"
+  },
+  {
+    "id": "FE-2",
+    "title": "[FE-2] 인증 화면 (FR-1, FR-2)",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": ["FE-1"],
+    "done": false,
+    "body": "## 작업 내용\n회원가입 및 로그인 UI 및 로직\n- `authApi.ts`(회원가입/로그인 API 호출)\n- `useSignupMutation`/`useLoginMutation` TanStack Query 훅\n- `useAuthStore` Zustand(localStorage 캡슐화, accessToken/user 저장)\n- `LoginForm`/`SignupForm` 컴포넌트\n- `routes/auth/{LoginPage,SignupPage}.tsx`\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-1 회원가입(이메일/비밀번호/닉네임 입력, 형식/중복 검증), FR-2 로그인(이메일/비밀번호, 계정 존재 여부 비노출, 토큰 저장, 토큰 만료 1~2시간)\n- **와이어프레임 (8-wireframe.md)**: S1 로그인 화면(카드형 중앙 정렬, 에러 메시지), S2 회원가입 화면(3개 필드), 3.1/4.1 모바일 버전\n- **프로젝트 구조 (4-project-structure.md)**: 3.2절 Zustand(클라이언트 상태) vs TanStack Query, 6.3절 토큰 저장/인터셉터\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 회원가입→로그인, E-8 일반화 메시지\n\n## 의존성\nFE-1 완료 필요. BE-2(인증 API) 완성 필요 — 스펙 합의 시 Mock으로 선행 가능\n\n## 완료 조건\n- [ ] 회원가입 폼 클라이언트 측 검증(이메일 형식/필수값) 동작\n- [ ] 로그인 성공 시 토큰 저장 + `/todos` 리다이렉트\n- [ ] 로그인 실패 시 일반화 메시지 표시(E-8)\n- [ ] 로그아웃 시 토큰 삭제 + `/login` 이동\n- [ ] 401 응답 시 자동 로그아웃+리다이렉트(FE-1 인터셉터 연동)"
+  },
+  {
+    "id": "FE-3",
+    "title": "[FE-3] 카테고리 관리 화면 (FR-8 Must / FR-9 Should)",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": ["FE-1", "FE-2"],
+    "done": false,
+    "body": "## 작업 내용\n카테고리 생성/수정/삭제 UI\n- `categoryApi.ts`(카테고리 CRUD API 호출)\n- TanStack Query 훅: `useCategoriesQuery`, `useCreateCategoryMutation`, `useUpdateCategoryMutation`, `useDeleteCategoryMutation`\n- `CategoryList`/`CategoryForm` 컴포넌트\n- 기본 카테고리 수정/삭제 UI 비노출\n- 삭제 컨펌 다이얼로그 + 이관 안내 문구\n- `routes/categories/CategoryManagePage.tsx`\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-8 카테고리 생성(중복 방지 권장), FR-9 수정/삭제(기본 카테고리 보호, 할일 자동 이관)\n- **와이어프레임 (8-wireframe.md)**: S5 카테고리 관리 화면(생성 폼+목록 통합, 기본 카테고리 고정/비활성, 인라인 편집, 삭제 컨펌), 7.1 모바일 버전\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 7(카테고리 삭제 시 할일 이관), E-3/E-4 예외\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 카테고리 생성(과제/스터디), 3.3 P3 수정(기타업무→팀 운영)/삭제, E-3 이관 확인\n\n## 의존성\nFE-1, FE-2 필요. BE-3(카테고리 API) 필요 — Mock 선행 가능. FE-4/FE-5보다 먼저 착수 권장\n\n## 완료 조건\n- [ ] 생성 시 목록 즉시 반영\n- [ ] 기본 카테고리에 수정/삭제 UI 미노출\n- [ ] 삭제 컨펌 다이얼로그 및 API 호출 확인\n- [ ] 이름 수정 후 목록 반영\n- [ ] (Should) 여력 없으면 생성만으로 축소 가능"
+  },
+  {
+    "id": "FE-4",
+    "title": "[FE-4] 할일 목록 화면 (FR-5)",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": ["FE-1", "FE-2", "FE-3"],
+    "done": false,
+    "body": "## 작업 내용\n할일 목록 조회, 필터링, 상태 표시, 페이지네이션 UI\n- `todoApi.ts`(getTodos 함수)\n- `useTodosQuery` TanStack Query 훅\n- `useTodoFilterStore` Zustand(선택된 categoryId, status)\n- `TodoFilterBar` 컴포넌트(카테고리/상태 AND 필터 UI)\n- `TodoList`/`TodoListItem` 컴포넌트\n- `TodoStatusBadge` 컴포넌트(시작전/진행중/기한초과/완료 뱃지)\n- `buildTodoQueryParams` 함수(필터 → 쿼리파라미터 변환)\n- 최소 페이지네이션 UI\n- `routes/todos/TodoListPage.tsx`\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-5 목록 조회(카테고리/상태 동시 AND 필터, 페이지네이션 대량 데이터 보호)\n- **와이어프레임 (8-wireframe.md)**: S3 할일 목록 데스크톱(필터바+목록+페이지네이션), 5.1 모바일(필터 토글)\n- **도메인 정의서 (1-domain-definition.md)**: 4장 상태 정의(시작전/진행중/완료/기한초과)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 필터 사용(과제/진행중), 3.2 P2 상태 필터(기한초과)\n- **프로젝트 구조 (4-project-structure.md)**: 3.3절 Zustand(필터)vs TanStack Query(결과), 3.2절 레이어 의존성\n\n## 의존성\nFE-1, FE-2, FE-3 필요. BE-5(목록 조회 API) 필요 — 응답 스키마 확정 시 Mock 선행 가능. 이후 FE-5/FE-6이 재사용하는 병목 Task, 최우선 진행\n\n## 완료 조건\n- [ ] 카테고리+상태 동시 선택 시 AND 필터링 확인\n- [ ] 필터 상태(Zustand) 변경 시 쿼리 재요청 확인\n- [ ] 완료 항목은 기한초과 무관 '완료' 뱃지(E-6)\n- [ ] 빈 목록/로딩/에러 각각 공통 컴포넌트 노출\n- [ ] 페이지네이션(개수 제한) UI 동작"
+  },
+  {
+    "id": "FE-5",
+    "title": "[FE-5] 할일 등록/수정 화면 (FR-4, FR-6)",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": ["FE-1", "FE-2", "FE-3", "FE-4"],
+    "done": false,
+    "body": "## 작업 내용\n할일 생성/수정 폼 UI 및 검증\n- `TodoForm` 컴포넌트(등록/수정 공용)\n- `DateRangePicker` 컴포넌트(캘린더 UI)\n- `validateTodoForm` 순수 함수(종료일자 ≥ 시작일자 검증, 테스트 대상)\n- `useCreateTodoMutation`/`useUpdateTodoMutation` TanStack Query 훅\n- 제출 성공 시 목록 이동+invalidate\n- `routes/todos/{TodoCreatePage,TodoEditPage}.tsx`\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-4 할일 등록(제목/설명/카테고리/시작일자/종료일자, 미지정 시 기본 적용), FR-6 수정(완료 여부 포함), 종료일자 유효성\n- **와이어프레임 (8-wireframe.md)**: S4 데스크톱(통합 폼, 캘린더, 유효성 오류, 완료 여부/삭제 수정만), 6.1 모바일(세로 레이아웃, 시작/종료일자 순차)\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 2(기본 카테고리), 규칙 3(종료일자 유효성)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 등록(카테고리 미지정), 3.2 P2 수정, E-1 유효성 오류, E-2 카테고리 미지정\n- **프로젝트 구조 (4-project-structure.md)**: 5장 테스트 원칙(유효성 검증 순위 2순위)\n\n## 의존성\nFE-1~FE-4 필요. BE-4(등록/수정 API) 필요 — Mock 선행 가능\n\n## 완료 조건\n- [ ] 종료일자<시작일자 시 클라이언트 즉시 차단+에러 표시(E-1)\n- [ ] 카테고리 미지정 등록 정상 동작(E-2)\n- [ ] 성공 시 목록 이동 및 반영\n- [ ] 수정 화면 진입 시 기존 값 프리필\n- [ ] 404 응답(타 소유) 시 \"존재하지 않는 항목입니다\" 안내(E-5)"
+  },
+  {
+    "id": "FE-6",
+    "title": "[FE-6] 할일 삭제 및 완료 처리 UI (FR-7, FR-6 일부, FR-11 Should)",
+    "area": "fe",
+    "priority": "must",
+    "dependsOn": ["FE-4", "FE-5"],
+    "done": false,
+    "body": "## 작업 내용\n할일 삭제 및 완료 처리 인터랙션\n- 삭제 컨펌 다이얼로그(`ConfirmDialog`)\n- 완료 토글 UI(체크박스)\n- 완료일시 표시(FR-11 Should, 미구현 시 생략 가능)\n- 뱃지 즉시 갱신(TanStack Query invalidate)\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-7 삭제(컨펌 UI), FR-6 완료 여부, FR-11 완료일시(Should)\n- **와이어프레임 (8-wireframe.md)**: S4 삭제 컨펌 다이얼로그, S3 목록에 완료일시 표시(\"완료일시 2026-07-22 14:03\")\n- **도메인 정의서 (1-domain-definition.md)**: 규칙 6(완료 우선순위)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1 P1 완료 처리/삭제, E-6 완료 우선순위\n\n## 의존성\nFE-4, FE-5 완료 필요. BE-4/BE-8(삭제/완료 API) 필요 — Mock 선행 가능\n\n## 완료 조건\n- [ ] 삭제 컨펌 확인 시에만 API 호출\n- [ ] 취소 시 삭제 미실행\n- [ ] 완료 체크 시 뱃지 즉시 갱신, 기한초과 무관\n- [ ] (Should) 완료일시 표시 — 여력 없으면 생략 가능"
+  },
+  {
+    "id": "FE-7",
+    "title": "[FE-7] (Should — 여력 시) 계정 정보 수정 화면 (FR-3)",
+    "area": "fe",
+    "priority": "should",
+    "dependsOn": ["FE-1", "FE-2"],
+    "done": false,
+    "body": "## 작업 내용\n사용자 계정 정보 변경 UI\n- 닉네임/비밀번호 변경 폼\n- 클라이언트 정책 검증(최소 길이 등)\n- `routes/account/{AccountViewPage,AccountEditPage}.tsx`\n- AccountViewPage: 읽기 전용 조회\n- AccountEditPage: 닉네임/비밀번호 변경 폼\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-3 계정 정보 수정(닉네임/비밀번호, 최소 길이 정책)\n- **와이어프레임 (8-wireframe.md)**: S6 내 정보 조회(읽기 전용), S7 비밀번호/닉네임 변경(이메일 수정 불가), 8.1/9.1 모바일\n- **사용자 시나리오 (3-user-scenario.md)**: 3.3 P3 닉네임/비밀번호 변경\n\n## 의존성\nFE-1, FE-2 필요. BE-7 필요 — Mock 선행 가능. 일정 지연 시 최우선 스킵 대상\n\n## 완료 조건\n- [ ] 닉네임 변경 즉시 반영\n- [ ] 비밀번호 최소 길이 미달 시 에러 표시\n- [ ] 성공/실패 피드백 노출"
+  },
+  {
+    "id": "FE-8",
+    "title": "[FE-8] 반응형 스타일 점검 및 공통 UI 마무리",
+    "area": "fe",
+    "priority": "should",
+    "dependsOn": ["FE-2", "FE-3", "FE-4", "FE-5", "FE-6", "FE-7"],
+    "done": false,
+    "body": "## 작업 내용\n모바일/태블릿/PC 반응형 완성 및 정상 동작 검증\n- 375px 폭(모바일) 가로 스크롤 없음 확인\n- 태블릿/PC 폭 레이아웃 정상 확인\n- 공통 UI(GNB 햄버거 메뉴, 버튼, 입력 필드) 일관 적용\n- 페르소나 시나리오(P1/P2/P3) 수동 완주\n- 예외 시나리오(E-1~E-8) 화면 동작 확인\n\n## 관련 문서\n- **와이어프레임 (8-wireframe.md)**: 각 화면 데스크톱/모바일 버전 비교(3.1/4.1/5.1/6.1/7.1/8.1/9.1), 10장 공용 UI 요소(반응형 GNB/카드 폭/버튼 배치 원칙)\n- **사용자 시나리오 (3-user-scenario.md)**: 3.1/3.2/3.3 정상 흐름, E-1~E-8 예외 시나리오\n- **PRD (2-PRD.md)**: 6.4절 반응형 웹 UI\n\n## 의존성\nFE-2~FE-7 대부분 완료 후. 백엔드 의존 없음\n\n## 완료 조건\n- [ ] 375px 폭에서 가로 스크롤 없이 정상 렌더링\n- [ ] 태블릿/PC 폭 레이아웃 정상\n- [ ] P1/P2/P3 정상 흐름 시나리오 수동 완주\n- [ ] E-1, E-2, E-5, E-7, E-8 경계 시나리오 화면 동작 확인"
+  },
+  {
+    "id": "FE-9",
+    "title": "[FE-9] 핵심 로직 단위 테스트",
+    "area": "fe",
+    "priority": "should",
+    "dependsOn": ["FE-4", "FE-5"],
+    "done": false,
+    "body": "## 작업 내용\n핵심 비즈니스 로직 테스트 작성\n- `deriveTodoStatus` Vitest 단위 테스트(순수 함수, 4개 상태 경계값)\n- `validateTodoForm` Vitest 단위 테스트(종료일자 유효성 경계값)\n- Vitest + React Testing Library 셋업\n\n## 관련 문서\n- **프로젝트 구조 (4-project-structure.md)**: 5장 테스트 원칙(순수 로직 위주, 상태 파생 계산 최우선)\n- **도메인 정의서 (1-domain-definition.md)**: 4장 상태 정의(경계값: 시작일=오늘, 종료일=오늘)\n- **실행계획 (7-execution-plan.md)**: FE-9 완료 조건(4개 케이스, 날짜 유효성 경계 포함)\n\n## 의존성\nFE-4/FE-5와 병행 또는 직후. 백엔드 의존 없음\n\n## 완료 조건\n- [ ] 시작전/진행중/기한초과/완료(기한 무관) 4개 케이스 테스트 통과\n- [ ] 날짜 유효성 검증(경계 포함) 테스트 통과\n- [ ] `npm run test` 전체 통과"
+  },
+  {
+    "id": "FE-10",
+    "title": "[FE-10] (Could — 여력 시) 카테고리별 개수 표시 및 정렬 (FR-12, FR-13)",
+    "area": "fe",
+    "priority": "could",
+    "dependsOn": ["FE-3", "FE-4"],
+    "done": false,
+    "body": "## 작업 내용\n카테고리별 할일 개수 표시 및 목록 정렬 옵션 (부가 기능)\n- 카테고리별 할일 개수 표시(FR-12)\n- 목록 정렬 옵션(마감임박순, 최신순 등, FR-13)\n- 미구현 시 FE-4 기본 정렬(등록일시 역순)로 대체\n\n## 관련 문서\n- **PRD (2-PRD.md)**: FR-12 카테고리별 개수 표시(Could), FR-13 정렬(Could), 미구현 시 기본 정렬로 대체\n- **와이어프레임 (8-wireframe.md)**: S5 카테고리 관리 화면(메모: Could로 \"할일 N건\" 형태 표시 가능)\n- **실행계획 (7-execution-plan.md)**: 우선순위 축소 순서에서 FE-10 최우선 제외 대상\n\n## 의존성\nFE-3, FE-4 필요. BE 미지원 시 클라이언트 사이드로 임시 구현 가능\n\n## 완료 조건\n- [ ] (구현 시) 카테고리별 개수 표시 확인\n- [ ] (구현 시) 정렬 옵션 변경 시 순서 즉시 반영\n- [ ] 미착수 시 FE-4 기본 정렬(등록일시 역순)로 대체됨을 확인"
+  }
+]

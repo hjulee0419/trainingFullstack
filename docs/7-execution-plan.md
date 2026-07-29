@@ -40,9 +40,9 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: 없음 (착수 시작점)
 
 **완료 조건**
-- [ ] `psql -h localhost -U <app_user> -d todolist_dev -c '\conninfo'` 접속 성공
-- [ ] `SELECT version();` 결과에 PostgreSQL 17.x 표기 확인
-- [ ] `.env.example`에 DB 접속 키가 placeholder로 커밋, 실제 `.env`는 `.gitignore` 포함
+- [x] `psql -h localhost -U <app_user> -d todolist_dev -c '\conninfo'` 접속 성공
+- [x] `SELECT version();` 결과에 PostgreSQL 17.x 표기 확인
+- [x] `.env.example`에 DB 접속 키가 placeholder로 커밋, 실제 `.env`는 `.gitignore` 포함
 
 ### DB-2. 마이그레이션 러너 및 `migrations/` 디렉토리 구성
 **작업 내용**
@@ -52,9 +52,9 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-1 완료 필요. BE-1(`package.json` 생성)과 상호 조율 필요 — **BE-1이 DB-2를 기다림**
 
 **완료 조건**
-- [ ] `migrations/` 디렉토리 및 네이밍 규칙 문서화(README/주석)
-- [ ] `npm run migrate:up`/`migrate:down`이 빈 상태에서 오류 없이 실행
-- [ ] 러너의 자체 관리 테이블(`pgmigrations` 등) 생성을 `\dt`로 확인
+- [x] `migrations/` 디렉토리 및 네이밍 규칙 문서화(README/주석)
+- [x] `npm run migrate:up`/`migrate:down`이 빈 상태에서 오류 없이 실행
+- [x] 러너의 자체 관리 테이블(`pgmigrations` 등) 생성을 `\dt`로 확인
 
 ### DB-3. 스키마 마이그레이션 작성 및 적용 (schema.sql → 001~003 분할)
 **작업 내용**
@@ -65,12 +65,12 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-1, DB-2 완료 필요. **BE-3(회원가입/로그인 API 구현)이 이 Task의 완료(기본 카테고리 정책 확정)를 기다림**
 
 **완료 조건**
-- [ ] `migrations/001~003_*.sql`(up/down) 존재
-- [ ] `migrate:up` 후 `\d`로 `users`/`categories`/`todos` 3개 테이블 존재 확인
-- [ ] `\d todos`로 `ck_todos_end_date_after_start` CHECK 및 3개 인덱스 존재 확인
-- [ ] `\d categories`로 `uq_categories_user_id_name`, `uq_categories_user_id_default`(부분 유니크) 존재 확인
-- [ ] `migrate:down`→`migrate:up` 재실행 오류 없이 성공(왕복 가능 확인)
-- [ ] "기본 카테고리는 회원가입 트랜잭션에서 생성"이라는 정책이 커밋 메시지/주석으로 명시되어 BE가 참조 가능
+- [x] `migrations/001~003_*.sql`(up/down) 존재 (실제 파일명은 node-pg-migrate index 포맷 4자리: `0001~0003_*.sql`)
+- [x] `migrate:up` 후 `\d`로 `users`/`categories`/`todos` 3개 테이블 존재 확인
+- [x] `\d todos`로 `ck_todos_end_date_after_start` CHECK 및 3개 인덱스 존재 확인
+- [x] `\d categories`로 `uq_categories_user_id_name`, `uq_categories_user_id_default`(부분 유니크) 존재 확인
+- [x] `migrate:down`→`migrate:up` 재실행 오류 없이 성공(왕복 가능 확인)
+- [x] "기본 카테고리는 회원가입 트랜잭션에서 생성"이라는 정책이 커밋 메시지/주석으로 명시되어 BE가 참조 가능
 
 ### DB-4. pg Pool 커넥션 설정값 확정 및 검증
 **작업 내용**
@@ -80,9 +80,9 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-1 완료 필요. DB-2/DB-3과 병렬 가능. **BE-2(백엔드 pg Pool 세팅)가 DB-4를 기다림**
 
 **완료 조건**
-- [ ] `max`/`idleTimeoutMillis`/`connectionTimeoutMillis` 값이 문서화됨
-- [ ] 검증 스크립트에서 `SELECT 1` 성공 응답
-- [ ] `pool.end()` 시 커넥션 정상 반환/종료 확인(누수 없음)
+- [x] `max`/`idleTimeoutMillis`/`connectionTimeoutMillis` 값이 문서화됨
+- [x] 검증 스크립트에서 `SELECT 1` 성공 응답
+- [x] `pool.end()` 시 커넥션 정상 반환/종료 확인(누수 없음)
 
 ### DB-5. 인덱스 및 제약조건 존재 검증
 **작업 내용**
@@ -91,9 +91,9 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-3 완료 필요. Critical path 아님(시간 없으면 축소 가능)
 
 **완료 조건**
-- [ ] `pg_indexes` 조회 결과에 `todos`용 인덱스 3개 모두 표시
-- [ ] 각 인덱스 선행 컬럼이 `user_id`임을 `indexdef`로 확인
-- [ ] `\d+` 출력과 `docs/6-erd.md`의 제약조건 대조 완료
+- [x] `pg_indexes` 조회 결과에 `todos`용 인덱스 3개 모두 표시
+- [x] 각 인덱스 선행 컬럼이 `user_id`임을 `indexdef`로 확인
+- [x] `\d+` 출력과 `docs/6-erd.md`의 제약조건 대조 완료
 
 ### DB-6. (여력 시) 시드/테스트 데이터 스크립트 및 핸드오프 노트
 **작업 내용**
@@ -103,9 +103,9 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-3, DB-4 완료 필요. **BE-3~BE-5가 참조하나 필수는 아님(스킵 가능)**
 
 **완료 조건**
-- [ ] 시드 스크립트 실행 후 `users` row 존재 확인
-- [ ] 시드된 각 사용자에 `is_default=true` 카테고리가 정확히 1개씩 존재(그룹별 count=1 쿼리로 확인)
-- [ ] 핸드오프 노트에 접속정보/마이그레이션 명령/Pool 값/기본 카테고리 정책 모두 언급
+- [x] 시드 스크립트 실행 후 `users` row 존재 확인
+- [x] 시드된 각 사용자에 `is_default=true` 카테고리가 정확히 1개씩 존재(그룹별 count=1 쿼리로 확인)
+- [x] 핸드오프 노트에 접속정보/마이그레이션 명령/Pool 값/기본 카테고리 정책 모두 언급
 
 ---
 
@@ -122,11 +122,11 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: DB-1(접속정보) 필요. DB-2와 `package.json`/마이그레이션 스크립트 위치 상호 조율.
 
 **완료 조건**
-- [ ] `node src/server.js` 정상 기동, 포트 로그 출력
-- [ ] 필수 환경변수 누락 시 기동 즉시 실패(fail fast) + 명확한 에러 로그
-- [ ] `GET /api/v1/health` 200 응답 및 DB 커넥션 획득 성공 확인
-- [ ] 임시 예외 라우트 호출 시 error-handler가 일관된 JSON 에러 포맷 응답, stack trace 미노출
-- [ ] 허용되지 않은 Origin 요청 CORS 차단 확인
+- [x] `node src/server.js` 정상 기동, 포트 로그 출력
+- [x] 필수 환경변수 누락 시 기동 즉시 실패(fail fast) + 명확한 에러 로그
+- [x] `GET /api/v1/health` 200 응답 및 DB 커넥션 획득 성공 확인
+- [x] 임시 예외 라우트 호출 시 error-handler가 일관된 JSON 에러 포맷 응답, stack trace 미노출
+- [x] 허용되지 않은 Origin 요청 CORS 차단 확인
 
 ### BE-2. 인증 API (FR-1 회원가입, FR-2 로그인/JWT)
 **작업 내용**
