@@ -229,7 +229,8 @@ frontend/
 │   │   ├── categories/
 │   │   │   └── CategoryManagePage.tsx  # UC-8, UC-9
 │   │   └── account/
-│   │       └── AccountSettingsPage.tsx # UC-3
+│   │       ├── AccountViewPage.tsx     # FR-3: 조회/변경 2화면 — 조회 전용(읽기 전용 프로필)
+│   │       └── AccountEditPage.tsx     # FR-3: 조회/변경 2화면 — 비밀번호/닉네임 변경 폼
 │   │
 │   ├── features/                       # 기능(도메인) 단위 로직 — 1차 분리 기준
 │   │   ├── auth/
