@@ -43,4 +43,4 @@ function toSnakeCase(obj) {
   return transform(obj, camelToSnakeKey);
 }
 
-module.exports = { toCamelCase, toSnakeCase };
+module.exports = { toCamelCase, toSnakeCase, camelToSnake: camelToSnakeKey };

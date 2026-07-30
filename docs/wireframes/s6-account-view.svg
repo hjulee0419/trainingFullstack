@@ -1,0 +1,49 @@
+<svg width="1040" height="520" viewBox="0 0 1040 520" xmlns="http://www.w3.org/2000/svg">
+  <title>S6. 내 정보 조회 화면 — 데스크톱</title>
+  <desc>docs/8-wireframe.md S6 와이어프레임을 docs/9-style-guide.md 디자인 토큰으로 렌더링한 목업</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+    .logo { font-size: 18px; font-weight: 700; fill: #4361EE; }
+    .nav { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .nav-active { font-size: 14px; font-weight: 500; fill: #4361EE; }
+    .user { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .back { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .h1 { font-size: 24px; font-weight: 700; fill: #1F2126; }
+    .label { font-size: 12px; font-weight: 500; fill: #8B909A; }
+    .value { font-size: 14px; font-weight: 400; fill: #1F2126; }
+    .btn-label { font-size: 14px; font-weight: 500; fill: #FFFFFF; }
+  </style>
+
+  <!-- page background: --color-gray-50 -->
+  <rect x="0" y="0" width="1040" height="520" fill="#F7F8FA"/>
+
+  <!-- GNB: 56px 고정 높이, 흰 배경 + 하단 테두리 -->
+  <rect x="0" y="0" width="1040" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="56" x2="1040" y2="56" stroke="#D9DCE1" stroke-width="1"/>
+  <text x="32" y="34" class="logo">TodoList</text>
+  <text x="180" y="34" class="nav">할일 목록</text>
+  <text x="280" y="34" class="nav">카테고리</text>
+  <text x="372" y="34" class="nav-active">계정</text>
+  <rect x="372" y="46" width="32" height="2" fill="#4361EE"/>
+  <text x="1008" y="34" text-anchor="end" class="user">user@mail.com  ▾</text>
+
+  <!-- 뒤로가기 + 제목 -->
+  <text x="40" y="96" class="back">← 목록으로</text>
+  <text x="40" y="140" class="h1">내 정보 조회</text>
+
+  <!-- 카드 -->
+  <rect x="40" y="176" width="720" height="294" rx="10" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+
+  <text x="72" y="220" class="label">이메일</text>
+  <text x="72" y="242" class="value">user@mail.com</text>
+
+  <text x="72" y="284" class="label">닉네임</text>
+  <text x="72" y="306" class="value">홍길동</text>
+
+  <text x="72" y="348" class="label">가입일시</text>
+  <text x="72" y="370" class="value">2026-05-01 09:12</text>
+
+  <!-- Primary 버튼: 정보 수정 (S7로 이동하는 화면당 유일한 핵심 액션) -->
+  <rect x="72" y="402" width="104" height="36" rx="6" fill="#4361EE"/>
+  <text x="124" y="425" text-anchor="middle" class="btn-label">정보 수정</text>
+</svg>

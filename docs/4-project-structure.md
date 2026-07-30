@@ -138,76 +138,96 @@ backend REST API
 
 ## 7. 백엔드 디렉토리 구조
 
+> 아래는 BE-1~BE-8 구현이 완료된 시점의 실제 구조다(계획 단계 문서가 아니라 현재 코드베이스 기준).
+
 ```
 backend/
 ├── src/
 │   ├── config/
-│   │   ├── env.js              # 환경변수 로드 및 필수값 검증
-│   │   └── db.pool.js          # pg.Pool 인스턴스 생성/설정
+│   │   ├── env.js              # 환경변수 로드/fail-fast 검증 (DATABASE_URL, JWT_SECRET 등 필수)
+│   │   └── db.pool.js          # pg.Pool 싱글턴({ getPool })
 │   │
 │   ├── routes/
-│   │   ├── index.js            # 라우트 통합 (v1 프리픽스 마운트)
-│   │   ├── auth.routes.js
-│   │   ├── category.routes.js
-│   │   └── todo.routes.js
+│   │   ├── index.js            # 라우트 통합 (/api/v1 프리픽스로 각 라우터 마운트)
+│   │   ├── health.routes.js    # GET /health
+│   │   ├── docs.routes.js      # GET /docs — swagger-ui-express로 swagger/swagger.json 서빙
+│   │   ├── auth.routes.js      # POST /signup, /login (인증 불필요)
+│   │   ├── category.routes.js  # GET/POST /, PATCH/DELETE /:categoryId (전부 requireAuth)
+│   │   ├── todo.routes.js      # GET/POST /, PATCH/DELETE /:todoId (전부 requireAuth)
+│   │   └── user.routes.js      # GET/PATCH /me (전부 requireAuth)
 │   │
 │   ├── controllers/
+│   │   ├── health.controller.js
 │   │   ├── auth.controller.js
 │   │   ├── category.controller.js
-│   │   └── todo.controller.js
+│   │   ├── todo.controller.js
+│   │   └── user.controller.js
 │   │
 │   ├── services/
-│   │   ├── auth.service.js
+│   │   ├── auth.service.js         # 회원가입(기본 카테고리 동시 생성 트랜잭션)/로그인
 │   │   ├── category.service.js     # 삭제 시 할일 이관 트랜잭션 오케스트레이션
-│   │   └── todo.service.js
+│   │   ├── todo.service.js         # CRUD + 목록조회, completedAt 자동 기록/초기화
+│   │   └── user.service.js         # 계정 정보 조회/수정
 │   │
 │   ├── repositories/
 │   │   ├── user.repository.js
 │   │   ├── category.repository.js
-│   │   └── todo.repository.js      # 모든 raw SQL 캡슐화
+│   │   └── todo.repository.js      # 모든 raw SQL 캡슐화, 목록조회는 SQL CASE로 상태 파생
 │   │
 │   ├── domain/
-│   │   └── todo-status.js          # 상태 파생 계산 순수 함수
+│   │   └── todo-status.js          # 상태 파생 계산 순수 함수(deriveTodoStatus) — BE-6 단위테스트 대상
 │   │
 │   ├── middlewares/
-│   │   ├── auth.middleware.js      # JWT 검증, req.user 주입
-│   │   ├── error-handler.js
-│   │   ├── async-handler.js
-│   │   └── validate.js
+│   │   ├── auth.middleware.js      # requireAuth: JWT 검증, req.user={id} 주입
+│   │   ├── error-handler.js        # 응답 스키마 {statusCode, message, details?} (swagger ErrorResponse)
+│   │   └── async-handler.js
 │   │
 │   ├── utils/
-│   │   ├── app-error.js
+│   │   ├── app-error.js            # class AppError(statusCode, message, details?)
 │   │   ├── case-mapper.js          # snake_case ↔ camelCase 변환
 │   │   ├── with-transaction.js     # 트랜잭션 헬퍼
-│   │   └── logger.js
+│   │   ├── logger.js               # 콘솔 기반 요청 로깅 + 민감정보 마스킹
+│   │   └── jwt.js                  # signAccessToken/verifyAccessToken/parseExpiresInToSeconds
 │   │
 │   ├── validators/
 │   │   ├── auth.schema.js
 │   │   ├── category.schema.js
-│   │   └── todo.schema.js
+│   │   ├── todo.schema.js          # 생성/수정/목록조회 쿼리 검증
+│   │   └── user.schema.js
 │   │
-│   ├── app.js                      # Express 앱 조립
-│   └── server.js                   # 서버 실행 진입점
+│   ├── app.js                      # Express 앱 조립 (helmet→cors→json→logger→routes→404→errorHandler)
+│   └── server.js                   # 서버 실행 진입점, SIGTERM/SIGINT graceful shutdown
 │
-├── migrations/
-│   ├── 001_create_users.sql
-│   ├── 002_create_categories.sql
-│   ├── 003_create_todos.sql
-│   └── 004_seed_default_category.sql
+├── migrations/                     # node-pg-migrate, 4자리 index 포맷(0001~)
+│   ├── 0001_create_users.sql
+│   ├── 0002_create_categories.sql  # 상단에 "기본 카테고리는 마이그레이션이 아닌 회원가입
+│   │                                 트랜잭션에서 생성"이라는 정책 주석 명시
+│   └── 0003_create_todos.sql
+│   (기본 카테고리 시딩 마이그레이션은 의도적으로 없음 — auth.service.js의 signup이 담당)
+│
+├── scripts/
+│   ├── free-port.js             # dev/start 전 PORT 점유 잔여 프로세스 자동 정리(predev/prestart)
+│   ├── seed.js                  # 개발용 더미 사용자 + 기본 카테고리 시딩
+│   ├── verify-db-pool.js
+│   └── verify-indexes.js
 │
 ├── tests/
-│   ├── unit/
-│   │   ├── todo-status.test.js
-│   │   ├── date-validation.test.js
-│   │   └── ownership.test.js
+│   ├── unit/                        # 순수 로직 단위 테스트
+│   │   ├── todo-status.test.js      # 4개 상태 + 경계값 + E-6
+│   │   ├── date-validation.test.js  # 날짜/제목/카테고리ID 검증 분기
+│   │   ├── ownership.test.js        # 소유자 검증 정책 정적 분석(user_id 조건, 403 미사용 등)
+│   │   ├── auth-middleware.test.js, jwt.test.js, health-controller.test.js
+│   │   └── app-error/async-handler/case-mapper/logger/with-transaction.test.js
 │   └── integration/
-│       └── happy-path.test.js
+│       ├── db/                      # migrations/pool/indexes/seed/env (todolist_test DB)
+│       └── app/                     # health/auth/category/todo/todo-list/user/
+│                                       error-handler/cors/docs/graceful-shutdown (supertest)
 │
 ├── .env.example
 ├── .env                         # (gitignore)
-├── .gitignore
+├── CLAUDE.md                    # 백엔드 개발 기본 지침(SOLID, Clean 아키텍처)
 ├── package.json
-└── README.md
+└── package-lock.json
 ```
 
 ## 8. 프론트엔드 디렉토리 구조

@@ -13,6 +13,14 @@ TodoList: 시작일/종료일을 가지며 상태(시작전/진행중/완료/기
 - 모든 대화는 한국어로 진행할 것
 - 지시하지 않은 작업 수행하지 말것(오버엔지니어링 금지)
 
+## 서버 실행 (`backend/`)
+
+```bash
+npm run dev     # 개발 서버 (node --watch, 파일 저장 시 자동 재시작)
+npm start       # 프로덕션과 동일한 방식으로 1회 기동 (node src/server.js)
+```
+`backend/.env`(gitignore 대상)에 `DATABASE_URL` 등 필수 환경변수가 없으면 fail-fast로 즉시 종료된다. 기동 확인은 `GET /api/v1/health`(DB 커넥션 확인 포함).
+
 ## 참조 문서 (`docs/`)
 
 작업 전에 해당 태스크가 다루는 문서를 먼저 읽어라 — FR 번호나 제약조건을 추측하지 말 것:

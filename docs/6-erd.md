@@ -57,5 +57,5 @@ erDiagram
 - `users.email`은 `UNIQUE` 제약(UK)으로 로그인 계정의 유일성을 보장한다.
 - `categories.user_id`, `todos.user_id`, `todos.category_id`는 모두 `NOT NULL` FK이며, Repository 조회 시 항상 `user_id` 조건을 함께 사용해 소유자 기반 접근을 강제한다.
 - `todos`에는 `CHECK (end_date >= start_date)` 제약을 두어 종료일자가 시작일자보다 이전인 데이터를 DB 레벨에서도 차단한다.
-- `categories.is_default`로 사용자별 '기본' 카테고리를 식별한다(마이그레이션 `004_seed_default_category.sql`에서 사용자 가입 시 함께 시딩). 카테고리 삭제 시 `category_id`는 NULL이 되지 않고, 애플리케이션(Service) 트랜잭션에서 소속 `todos.category_id`를 해당 사용자의 '기본' 카테고리 ID로 일괄 재할당한 뒤 카테고리를 삭제한다(단순 FK `ON DELETE` 액션만으로는 "동일 소유자의 기본 카테고리로 이관"을 표현할 수 없어 애플리케이션 레벨 처리를 택함).
+- `categories.is_default`로 사용자별 '기본' 카테고리를 식별한다. 별도 시딩 마이그레이션은 두지 않으며, 회원가입 API 트랜잭션(`backend/src/services/auth.service.js`의 `signup`)에서 `users` insert 직후 동일 트랜잭션으로 `is_default=true` 카테고리를 함께 생성한다(마이그레이션 시점 시딩은 그 시점 기존 사용자에게만 적용되고 이후 가입자에게는 적용되지 않기 때문 — `backend/migrations/0002_create_categories.sql` 상단 정책 주석 참조). 카테고리 삭제 시 `category_id`는 NULL이 되지 않고, 애플리케이션(Service) 트랜잭션에서 소속 `todos.category_id`를 해당 사용자의 '기본' 카테고리 ID로 일괄 재할당한 뒤 카테고리를 삭제한다(단순 FK `ON DELETE` 액션만으로는 "동일 소유자의 기본 카테고리로 이관"을 표현할 수 없어 애플리케이션 레벨 처리를 택함).
 - `status`(시작전/진행중/완료/기한초과)는 저장 컬럼이 아니다. `todos.is_completed`, `todos.start_date`, `todos.end_date`(완료 시 `completed_at`)를 기준으로 조회 시점에 계산되는 파생값이므로 테이블에 포함하지 않는다.

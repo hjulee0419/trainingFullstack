@@ -68,7 +68,7 @@ test('AppError 라우트 호출 시 400과 일관된 JSON 에러 포맷을 반�
   const res = await supertest(app).get('/throw-app-error');
 
   assert.equal(res.status, 400);
-  assert.equal(res.body.status, 'error');
+  assert.equal(res.body.statusCode, res.status);
   assert.equal(res.body.message, '커스텀 에러');
   assert.equal(Object.prototype.hasOwnProperty.call(res.body, 'stack'), false);
 });
@@ -81,7 +81,7 @@ test('일반 Error 라우트 호출 시 500을 반환하고 stack이 노출되�
     const res = await supertest(app).get('/throw-generic-error');
 
     assert.equal(res.status, 500);
-    assert.equal(res.body.status, 'error');
+    assert.equal(res.body.statusCode, res.status);
     assert.equal(Object.prototype.hasOwnProperty.call(res.body, 'stack'), false);
   } finally {
     if (previousNodeEnv === undefined) {
@@ -103,7 +103,7 @@ test(
       const res = await supertest(app).get('/throw-generic-error');
 
       assert.equal(res.status, 500);
-      assert.equal(res.body.status, 'error');
+      assert.equal(res.body.statusCode, res.status);
       assert.equal(res.body.message, 'Internal Server Error');
       assert.equal(Object.prototype.hasOwnProperty.call(res.body, 'stack'), false);
     } finally {

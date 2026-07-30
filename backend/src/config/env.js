@@ -10,15 +10,16 @@ const path = require('path');
 // 검증할 수 있도록 하는 override. 지정하지 않으면 항상 backend/.env를 절대경로로 로드한다.
 require('dotenv').config({ path: process.env.DOTENV_PATH || path.resolve(__dirname, '../../.env') });
 
-const REQUIRED_ENV_VARS = ['DATABASE_URL'];
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'];
 
 const OPTIONAL_ENV_VARS_WITH_DEFAULTS = {
   DB_POOL_MAX: '10',
   DB_POOL_IDLE_TIMEOUT_MS: '30000',
   DB_POOL_CONNECTION_TIMEOUT_MS: '2000',
-  PORT: '4000',
+  PORT: '3000',
   NODE_ENV: 'development',
   CORS_ORIGIN: 'http://localhost:5173',
+  JWT_EXPIRES_IN: '1h',
 };
 
 function validateEnv() {
@@ -49,6 +50,8 @@ const env = {
   PORT: Number(process.env.PORT),
   NODE_ENV: process.env.NODE_ENV,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
 };
 
 module.exports = env;

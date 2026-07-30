@@ -1,0 +1,72 @@
+<svg width="1040" height="690" viewBox="0 0 1040 690" xmlns="http://www.w3.org/2000/svg">
+  <title>S7. 비밀번호/닉네임 변경 화면 — 데스크톱</title>
+  <desc>docs/8-wireframe.md S7 와이어프레임을 docs/9-style-guide.md 디자인 토큰으로 렌더링한 목업</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+    .logo { font-size: 18px; font-weight: 700; fill: #4361EE; }
+    .nav { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .nav-active { font-size: 14px; font-weight: 500; fill: #4361EE; }
+    .user { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .back { font-size: 14px; font-weight: 400; fill: #4B4F58; }
+    .h1 { font-size: 24px; font-weight: 700; fill: #1F2126; }
+    .label { font-size: 12px; font-weight: 500; fill: #8B909A; }
+    .value { font-size: 14px; font-weight: 400; fill: #1F2126; }
+    .value-muted { font-size: 14px; font-weight: 400; fill: #8B909A; }
+    .caption { font-size: 12px; font-weight: 400; fill: #8B909A; }
+    .caption-danger { font-size: 12px; font-weight: 400; fill: #D92D20; }
+    .btn-primary-label { font-size: 14px; font-weight: 500; fill: #FFFFFF; }
+    .btn-secondary-label { font-size: 14px; font-weight: 500; fill: #1F2126; }
+    .icon-bang { font-size: 11px; font-weight: 700; fill: #FFFFFF; }
+  </style>
+
+  <!-- page background: --color-gray-50 -->
+  <rect x="0" y="0" width="1040" height="690" fill="#F7F8FA"/>
+
+  <!-- GNB -->
+  <rect x="0" y="0" width="1040" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="56" x2="1040" y2="56" stroke="#D9DCE1" stroke-width="1"/>
+  <text x="32" y="34" class="logo">TodoList</text>
+  <text x="180" y="34" class="nav">할일 목록</text>
+  <text x="280" y="34" class="nav">카테고리</text>
+  <text x="372" y="34" class="nav-active">계정</text>
+  <rect x="372" y="46" width="32" height="2" fill="#4361EE"/>
+  <text x="1008" y="34" text-anchor="end" class="user">user@mail.com  ▾</text>
+
+  <!-- 뒤로가기 + 제목 -->
+  <text x="40" y="96" class="back">← 내 정보로</text>
+  <text x="40" y="140" class="h1">비밀번호/닉네임 변경</text>
+
+  <!-- 카드 -->
+  <rect x="40" y="176" width="720" height="466" rx="10" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+
+  <!-- 이메일: 읽기 전용(수정 불가), 입력창이 아닌 정적 텍스트 -->
+  <text x="72" y="220" class="label">이메일</text>
+  <text x="72" y="242" class="value-muted">user@mail.com  (수정 불가)</text>
+
+  <!-- 닉네임: 기존 값이 프리필된 입력창 -->
+  <text x="72" y="284" class="label">닉네임</text>
+  <rect x="72" y="294" width="400" height="36" rx="6" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+  <text x="88" y="317" class="value">홍길동</text>
+
+  <!-- 새 비밀번호: 선택 입력 + 정책 캡션 -->
+  <text x="72" y="354" class="label">새 비밀번호 (변경 시에만 입력)</text>
+  <rect x="72" y="364" width="400" height="36" rx="6" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+  <text x="72" y="416" class="caption">최소 8자 이상 (기본 정책)</text>
+
+  <!-- 새 비밀번호 확인 -->
+  <text x="72" y="440" class="label">새 비밀번호 확인</text>
+  <rect x="72" y="450" width="400" height="36" rx="6" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+
+  <!-- 에러 메시지 배너: --color-danger-bg + --color-danger 텍스트 -->
+  <rect x="72" y="510" width="656" height="40" rx="6" fill="#FDECEC"/>
+  <circle cx="90" cy="530" r="8" fill="#D92D20"/>
+  <text x="90" y="534" text-anchor="middle" class="icon-bang">!</text>
+  <text x="110" y="534" class="caption-danger">비밀번호는 최소 8자 이상이어야 합니다.</text>
+
+  <!-- 버튼: 저장(Primary) + 취소(Secondary) -->
+  <rect x="72" y="574" width="84" height="36" rx="6" fill="#4361EE"/>
+  <text x="114" y="597" text-anchor="middle" class="btn-primary-label">저장</text>
+
+  <rect x="168" y="574" width="84" height="36" rx="6" fill="#FFFFFF" stroke="#D9DCE1" stroke-width="1"/>
+  <text x="210" y="597" text-anchor="middle" class="btn-secondary-label">취소</text>
+</svg>

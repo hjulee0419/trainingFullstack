@@ -56,7 +56,7 @@ npm run migrate:redo                # 최근 마이그레이션 롤백 후 재�
 
 **기본(is_default=true) 카테고리 시딩은 마이그레이션이 담당하지 않는다.** 이유: 마이그레이션 시딩은 실행 시점에 존재하는 사용자에게만 적용되고, 이후 가입하는 신규 사용자에게는 적용되지 않기 때문이다.
 
-- 실제 서비스에서 기본 카테고리는 **회원가입 API 트랜잭션**(`BE-2`, `backend/src/services/auth.service.js` 예정)에서 "사용자 insert -> 기본 카테고리 insert"를 하나의 트랜잭션으로 처리한다.
+- 실제 서비스에서 기본 카테고리는 **회원가입 API 트랜잭션**(`BE-2`, `backend/src/services/auth.service.js`의 `signup`)에서 "사용자 insert -> 기본 카테고리 insert"를 하나의 트랜잭션으로 처리한다(구현 완료, `withTransaction` 헬퍼 사용).
 - `backend/scripts/seed.js`도 동일한 순서(사용자 생성 직후 같은 트랜잭션에서 기본 카테고리 생성)를 따르며, 실행 후 `SELECT user_id, count(*) FROM categories WHERE is_default=true GROUP BY user_id HAVING count(*)<>1;` 쿼리로 위반 0건을 확인했다.
 - 관련 정책 주석은 `backend/migrations/0002_create_categories.sql` 상단과 `backend/migrations/README.md`에도 명시되어 있다.
 
