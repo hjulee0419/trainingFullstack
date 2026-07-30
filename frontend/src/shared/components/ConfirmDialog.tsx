@@ -1,5 +1,6 @@
 import { Modal } from '@/shared/components/Modal';
 import { Button } from '@/shared/components/Button';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -15,9 +16,13 @@ export function ConfirmDialog({
   message,
   onConfirm,
   onCancel,
-  confirmLabel = '삭제',
-  cancelLabel = '취소',
+  confirmLabel,
+  cancelLabel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('common.delete');
+  const resolvedCancelLabel = cancelLabel ?? t('common.cancel');
+
   return (
     <Modal open={open} onClose={onCancel}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
@@ -32,10 +37,10 @@ export function ConfirmDialog({
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)' }}>
           <Button variant="secondary" onClick={onCancel}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button variant="danger" onClick={onConfirm}>
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </Button>
         </div>
       </div>

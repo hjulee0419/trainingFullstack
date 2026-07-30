@@ -6,12 +6,14 @@ import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { useLoginMutation } from '@/features/auth/hooks/useLoginMutation';
 import { validateLoginForm } from '@/features/auth/lib/validateAuthForm';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface LoginFormProps {
   onSuccess: () => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -35,14 +37,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   return (
     <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
       <Input
-        label="이메일"
+        label={t('auth.login.emailLabel')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         error={fieldErrors.email}
       />
       <Input
-        label="비밀번호"
+        label={t('auth.login.passwordLabel')}
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -50,10 +52,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       />
       {loginMutation.isError && <ErrorMessage message={getErrorMessage(loginMutation.error)} />}
       <Button type="submit" fullWidth disabled={loginMutation.isPending}>
-        {loginMutation.isPending ? '로그인 중...' : '로그인'}
+        {loginMutation.isPending ? t('auth.login.submitting') : t('auth.login.submit')}
       </Button>
       <div className="auth-card__footer">
-        계정이 없으신가요? <Link to="/signup">회원가입 하기</Link>
+        {t('auth.login.footerQuestion')} <Link to="/signup">{t('auth.login.footerLink')}</Link>
       </div>
     </form>
   );

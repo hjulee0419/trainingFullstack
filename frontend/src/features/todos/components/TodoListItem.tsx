@@ -4,6 +4,7 @@ import { TodoStatusBadge } from '@/features/todos/components/TodoStatusBadge';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { useToggleTodoCompleteMutation } from '@/features/todos/hooks/useToggleTodoCompleteMutation';
 import { useDeleteTodoMutation } from '@/features/todos/hooks/useDeleteTodoMutation';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { Todo } from '@/features/todos/types';
 
 interface TodoListItemProps {
@@ -16,6 +17,7 @@ function formatCompletedAt(completedAt: string): string {
 
 export function TodoListItem({ todo }: TodoListItemProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const toggleCompleteMutation = useToggleTodoCompleteMutation();
   const deleteTodoMutation = useDeleteTodoMutation();
@@ -67,7 +69,7 @@ export function TodoListItem({ todo }: TodoListItemProps) {
           onClick={(e) => e.stopPropagation()}
           onChange={handleToggleComplete}
           disabled={toggleCompleteMutation.isPending}
-          aria-label="완료 여부"
+          aria-label={t('todo.item.completeCheckboxLabel')}
         />
         <TodoStatusBadge status={todo.status} />
         <span className="todo-list-item__title">{todo.title}</span>
@@ -76,9 +78,9 @@ export function TodoListItem({ todo }: TodoListItemProps) {
           type="button"
           className="todo-list-item__delete-button"
           onClick={handleDeleteClick}
-          aria-label="할일 삭제"
+          aria-label={t('todo.item.deleteButtonLabel')}
         >
-          삭제
+          {t('common.delete')}
         </button>
       </div>
       <div className="todo-list-item__footer">
@@ -87,14 +89,14 @@ export function TodoListItem({ todo }: TodoListItemProps) {
         </span>
         {todo.isCompleted && todo.completedAt && (
           <span className="todo-list-item__completed-at">
-            완료일시 {formatCompletedAt(todo.completedAt)}
+            {t('todo.item.completedAtLabel', { datetime: formatCompletedAt(todo.completedAt) })}
           </span>
         )}
       </div>
       <div onClick={(e) => e.stopPropagation()}>
         <ConfirmDialog
           open={isDeleteDialogOpen}
-          message={`'${todo.title}' 할일을 삭제하시겠습니까?`}
+          message={t('todo.item.deleteConfirm', { title: todo.title })}
           onConfirm={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
         />

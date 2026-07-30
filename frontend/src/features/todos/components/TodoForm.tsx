@@ -7,6 +7,7 @@ import { DateRangePicker } from '@/features/todos/components/DateRangePicker';
 import { useCategoriesQuery } from '@/features/categories/hooks/useCategoriesQuery';
 import { validateTodoForm, type TodoFormErrors, type TodoFormValues } from '@/features/todos/lib/validateTodoForm';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const emptyValues: TodoFormValues = {
   title: '',
@@ -26,6 +27,7 @@ interface TodoFormProps {
 
 export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitError }: TodoFormProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: categories } = useCategoriesQuery();
   const [values, setValues] = useState<TodoFormValues>(initialValues ?? emptyValues);
   const [errors, setErrors] = useState<TodoFormErrors>({});
@@ -48,7 +50,7 @@ export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitEr
 
       <div className="todo-form__field">
         <Input
-          label="제목 *"
+          label={t('todo.form.titleLabel')}
           value={values.title}
           onChange={(e) => setValues((prev) => ({ ...prev, title: e.target.value }))}
           error={errors.title}
@@ -57,7 +59,7 @@ export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitEr
 
       <div className="todo-form__field">
         <label htmlFor="todo-description" className="todo-form__label">
-          설명
+          {t('todo.form.descriptionLabel')}
         </label>
         <textarea
           id="todo-description"
@@ -69,7 +71,7 @@ export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitEr
 
       <div className="todo-form__field">
         <label htmlFor="todo-category" className="todo-form__label">
-          카테고리
+          {t('todo.form.categoryLabel')}
         </label>
         <select
           id="todo-category"
@@ -77,7 +79,7 @@ export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitEr
           value={values.categoryId}
           onChange={(e) => setValues((prev) => ({ ...prev, categoryId: e.target.value }))}
         >
-          <option value="">선택 안 함(기본 카테고리)</option>
+          <option value="">{t('todo.form.categoryDefaultOption')}</option>
           {categories?.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -96,10 +98,10 @@ export function TodoForm({ mode, initialValues, onSubmit, isSubmitting, submitEr
 
       <div className="todo-form__actions">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? '저장 중...' : '저장'}
+          {isSubmitting ? t('todo.form.saving') : t('common.save')}
         </Button>
         <Button variant="secondary" type="button" onClick={() => navigate('/todos')}>
-          취소
+          {t('common.cancel')}
         </Button>
       </div>
     </form>

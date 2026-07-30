@@ -71,6 +71,38 @@
   --gnb-height: 56px;
 }
 
+/* 다크 모드 토큰 오버라이드 — 컴포넌트는 전부 var(--color-*)만 참조하므로 여기서 값만 뒤집으면 전체 화면에 반영된다 */
+:root[data-theme='dark'] {
+  --color-white: #24262b;
+  --color-gray-50: #17181c;
+  --color-gray-100: #2c2f36;
+  --color-gray-300: #3a3d44;
+  --color-gray-500: #9aa0ab;
+  --color-gray-700: #c7cbd1;
+  --color-gray-900: #f0f1f3;
+
+  --color-primary: #6b83f2;
+  --color-primary-hover: #8497f5;
+  --color-primary-light: rgba(107, 131, 242, 0.18);
+
+  --color-status-not-started-bg: #2c2f36;
+  --color-status-not-started-text: #9aa0ab;
+  --color-status-in-progress-bg: rgba(107, 131, 242, 0.18);
+  --color-status-in-progress-text: #8497f5;
+  --color-status-completed-bg: rgba(14, 159, 110, 0.18);
+  --color-status-completed-text: #34d399;
+  --color-status-overdue-bg: rgba(217, 45, 32, 0.18);
+  --color-status-overdue-text: #f87171;
+
+  --color-danger: #f87171;
+  --color-danger-bg: rgba(217, 45, 32, 0.18);
+  --color-sunday: #f87171;
+  --color-saturday: #4dabf7;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
 *,
 *::before,
 *::after {
@@ -275,6 +307,36 @@ select {
   .gnb-mobile-menu a.active {
     background-color: var(--color-gray-100);
   }
+}
+
+.gnb-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gnb-icon-button {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gray-300);
+  background-color: var(--color-white);
+  color: var(--color-gray-900);
+  font-size: var(--font-caption-size);
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gnb-icon-button:hover {
+  background-color: var(--color-gray-100);
+}
+
+.gnb-locale-toggle {
+  font-weight: var(--font-body-medium-weight);
 }
 
 .user-menu {

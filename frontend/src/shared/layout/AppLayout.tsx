@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { UserMenu } from '@/shared/layout/UserMenu';
-
-const navItems = [
-  { to: '/todos', label: '할일 목록' },
-  { to: '/categories', label: '카테고리' },
-  { to: '/account', label: '계정' },
-];
+import { ThemeToggle } from '@/shared/layout/ThemeToggle';
+import { LocaleToggle } from '@/shared/layout/LocaleToggle';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function AppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const navItems = [
+    { to: '/todos', label: t('common.nav.todos') },
+    { to: '/categories', label: t('common.nav.categories') },
+    { to: '/account', label: t('common.nav.account') },
+  ];
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
@@ -30,11 +34,15 @@ export function AppLayout() {
             ))}
           </nav>
         </div>
-        <UserMenu />
+        <div className="gnb-right">
+          <LocaleToggle />
+          <ThemeToggle />
+          <UserMenu />
+        </div>
         <button
           type="button"
           className="gnb-mobile-toggle"
-          aria-label="메뉴 열기"
+          aria-label={t('common.nav.openMenu')}
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}
         >
           ☰

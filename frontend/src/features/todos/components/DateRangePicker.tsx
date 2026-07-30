@@ -1,3 +1,5 @@
+import { useTranslation } from '@/lib/i18n/useTranslation';
+
 interface DateRangePickerProps {
   startDate: string;
   endDate: string;
@@ -13,11 +15,12 @@ export function DateRangePicker({
   onEndDateChange,
   errors,
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
   return (
     <div className="date-range-picker">
       <div className="date-range-picker__field">
         <label htmlFor="todo-start-date" className="date-range-picker__label">
-          시작일자 *
+          {t('todo.dateRange.startDateLabel')}
         </label>
         <input
           id="todo-start-date"
@@ -31,7 +34,7 @@ export function DateRangePicker({
       </div>
       <div className="date-range-picker__field">
         <label htmlFor="todo-end-date" className="date-range-picker__label">
-          종료일자 *
+          {t('todo.dateRange.endDateLabel')}
         </label>
         <input
           id="todo-end-date"

@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
+import { useLocaleStore } from '@/features/locale/useLocaleStore';
+import { translate } from '@/lib/i18n/useTranslation';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -27,7 +29,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         <div style={{ padding: 'var(--space-8)' }}>
-          <ErrorMessage message="예기치 못한 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." />
+          <ErrorMessage
+            message={translate(useLocaleStore.getState().locale, 'common.unexpectedError')}
+          />
         </div>
       );
     }

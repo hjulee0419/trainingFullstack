@@ -10,9 +10,11 @@ import { TodoListPage } from '@/routes/todos/TodoListPage';
 import { TodoCreatePage } from '@/routes/todos/TodoCreatePage';
 import { TodoEditPage } from '@/routes/todos/TodoEditPage';
 import { onUnauthorized } from '@/lib/authEvents';
+import { useThemeStore } from '@/features/theme/useThemeStore';
 
 function App() {
   const navigate = useNavigate();
+  const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
     const unsubscribe = onUnauthorized(() => {
@@ -22,6 +24,10 @@ function App() {
       unsubscribe();
     };
   }, [navigate]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   return (
     <Routes>

@@ -5,6 +5,7 @@ import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { useUpdateCategoryMutation } from '@/features/categories/hooks/useUpdateCategoryMutation';
 import { useDeleteCategoryMutation } from '@/features/categories/hooks/useDeleteCategoryMutation';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import type { Category } from '@/features/categories/types';
 
 interface CategoryRowProps {
@@ -12,6 +13,7 @@ interface CategoryRowProps {
 }
 
 export function CategoryRow({ category }: CategoryRowProps) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(category.name);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -69,7 +71,7 @@ export function CategoryRow({ category }: CategoryRowProps) {
           </div>
           <div className="category-row__actions">
             <Button type="submit" disabled={updateCategoryMutation.isPending}>
-              저장
+              {t('common.save')}
             </Button>
             <Button
               type="button"
@@ -77,7 +79,7 @@ export function CategoryRow({ category }: CategoryRowProps) {
               onClick={handleEditCancel}
               disabled={updateCategoryMutation.isPending}
             >
-              취소
+              {t('common.cancel')}
             </Button>
           </div>
         </form>
@@ -89,20 +91,20 @@ export function CategoryRow({ category }: CategoryRowProps) {
     <li className="category-row">
       <span className="category-row__name">{category.name}</span>
       {category.isDefault ? (
-        <span className="category-row__caption">(삭제 불가·수정 불가)</span>
+        <span className="category-row__caption">{t('category.row.defaultCaption')}</span>
       ) : (
         <div className="category-row__actions">
           <Button variant="secondary" onClick={handleEditStart}>
-            수정
+            {t('common.edit')}
           </Button>
           <Button variant="danger" onClick={() => setIsDeleteDialogOpen(true)}>
-            삭제
+            {t('common.delete')}
           </Button>
         </div>
       )}
       <ConfirmDialog
         open={isDeleteDialogOpen}
-        message={`'${category.name}' 카테고리를 삭제하시겠습니까? 이 카테고리에 속한 할일은 '기본' 카테고리로 자동 이동됩니다.`}
+        message={t('category.row.deleteConfirm', { name: category.name })}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setIsDeleteDialogOpen(false)}
       />

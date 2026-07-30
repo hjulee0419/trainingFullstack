@@ -4,8 +4,10 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { CategoryRow } from '@/features/categories/components/CategoryRow';
 import { useCategoriesQuery } from '@/features/categories/hooks/useCategoriesQuery';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function CategoryList() {
+  const { t } = useTranslation();
   const { data: categories, isLoading, isError, error } = useCategoriesQuery();
 
   if (isLoading) {
@@ -17,7 +19,7 @@ export function CategoryList() {
   }
 
   if (!categories || categories.length === 0) {
-    return <EmptyState message="등록된 카테고리가 없습니다." />;
+    return <EmptyState message={t('category.list.empty')} />;
   }
 
   const sortedCategories = [...categories].sort((a, b) => {

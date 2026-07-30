@@ -4,12 +4,14 @@ import { Input } from '@/shared/components/Input';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { useUpdateNicknameMutation } from '@/features/account/hooks/useUpdateNicknameMutation';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface NicknameFormProps {
   initialNickname: string;
 }
 
 export function NicknameForm({ initialNickname }: NicknameFormProps) {
+  const { t } = useTranslation();
   const [nickname, setNickname] = useState(initialNickname);
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -21,14 +23,14 @@ export function NicknameForm({ initialNickname }: NicknameFormProps) {
 
     const trimmedNickname = nickname.trim();
     if (!trimmedNickname) {
-      setFieldError('닉네임을 입력해주세요.');
+      setFieldError(t('account.nickname.required'));
       return;
     }
     setFieldError(undefined);
 
     updateNicknameMutation.mutate(trimmedNickname, {
       onSuccess: () => {
-        setSuccessMessage('닉네임이 저장되었습니다.');
+        setSuccessMessage(t('account.nickname.success'));
       },
     });
   }
@@ -36,7 +38,7 @@ export function NicknameForm({ initialNickname }: NicknameFormProps) {
   return (
     <form className="account-form" onSubmit={handleSubmit} noValidate>
       <Input
-        label="닉네임"
+        label={t('account.nickname.label')}
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         error={fieldError}
@@ -48,7 +50,7 @@ export function NicknameForm({ initialNickname }: NicknameFormProps) {
         <p className="account-form__success">{successMessage}</p>
       )}
       <Button type="submit" disabled={updateNicknameMutation.isPending}>
-        {updateNicknameMutation.isPending ? '저장 중...' : '닉네임 저장'}
+        {updateNicknameMutation.isPending ? t('account.nickname.saving') : t('account.nickname.submit')}
       </Button>
     </form>
   );

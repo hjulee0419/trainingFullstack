@@ -1,6 +1,8 @@
 import axios, { type AxiosError } from 'axios';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { emitUnauthorized } from '@/lib/authEvents';
+import { useLocaleStore } from '@/features/locale/useLocaleStore';
+import { translate } from '@/lib/i18n/useTranslation';
 import type { ApiError } from '@/types/api';
 
 export const apiClient = axios.create({
@@ -27,7 +29,7 @@ apiClient.interceptors.response.use(
     if (!error.response) {
       const networkError: ApiError = {
         statusCode: 0,
-        message: '네트워크 오류가 발생했습니다.',
+        message: translate(useLocaleStore.getState().locale, 'common.networkError'),
       };
       return Promise.reject(networkError);
     }

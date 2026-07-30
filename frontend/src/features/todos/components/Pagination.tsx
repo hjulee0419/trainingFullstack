@@ -1,3 +1,5 @@
+import { useTranslation } from '@/lib/i18n/useTranslation';
+
 interface PaginationProps {
   page: number;
   totalPages: number;
@@ -5,6 +7,8 @@ interface PaginationProps {
 }
 
 export function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
+  const { t } = useTranslation();
+
   if (totalPages <= 1) {
     return null;
   }
@@ -12,14 +16,14 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <nav className="pagination" aria-label="페이지네이션">
+    <nav className="pagination" aria-label={t('todo.pagination.ariaLabel')}>
       <button
         type="button"
         className="pagination__nav"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
       >
-        ← 이전
+        {t('todo.pagination.prev')}
       </button>
       <div className="pagination__pages">
         {pages.map((p) => (
@@ -40,7 +44,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
       >
-        다음 →
+        {t('todo.pagination.next')}
       </button>
     </nav>
   );

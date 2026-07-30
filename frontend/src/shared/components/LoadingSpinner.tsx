@@ -1,12 +1,16 @@
+import { useTranslation } from '@/lib/i18n/useTranslation';
+
 interface LoadingSpinnerProps {
   size?: number;
 }
 
 export function LoadingSpinner({ size = 24 }: LoadingSpinnerProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       role="status"
-      aria-label="로딩 중"
+      aria-label={t('common.loading')}
       style={{
         display: 'flex',
         justifyContent: 'center',

@@ -3,8 +3,10 @@ import { Button } from '@/shared/components/Button';
 import { Input } from '@/shared/components/Input';
 import { useCreateCategoryMutation } from '@/features/categories/hooks/useCreateCategoryMutation';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function CategoryForm() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const createCategoryMutation = useCreateCategoryMutation();
 
@@ -28,7 +30,7 @@ export function CategoryForm() {
     <form className="category-form" onSubmit={handleSubmit} noValidate>
       <div className="category-form__field">
         <Input
-          label="새 카테고리 이름"
+          label={t('category.form.nameLabel')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           error={
@@ -39,7 +41,9 @@ export function CategoryForm() {
         />
       </div>
       <Button type="submit" disabled={createCategoryMutation.isPending}>
-        {createCategoryMutation.isPending ? '추가 중...' : '추가'}
+        {createCategoryMutation.isPending
+          ? t('category.form.submitting')
+          : t('category.form.submit')}
       </Button>
     </form>
   );

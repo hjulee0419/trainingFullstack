@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -33,7 +35,7 @@ export function UserMenu() {
       {isOpen && (
         <div className="user-menu__dropdown">
           <button type="button" onClick={handleLogout}>
-            로그아웃
+            {t('common.logout')}
           </button>
         </div>
       )}

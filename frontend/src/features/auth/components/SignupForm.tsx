@@ -6,12 +6,14 @@ import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { useSignupMutation } from '@/features/auth/hooks/useSignupMutation';
 import { validateSignupForm } from '@/features/auth/lib/validateAuthForm';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 interface SignupFormProps {
   onSuccess: () => void;
 }
 
 export function SignupForm({ onSuccess }: SignupFormProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
@@ -36,31 +38,31 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   return (
     <form className="auth-card__form" onSubmit={handleSubmit} noValidate>
       <Input
-        label="이메일"
+        label={t('auth.signup.emailLabel')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         error={fieldErrors.email}
       />
       <Input
-        label="비밀번호"
+        label={t('auth.signup.passwordLabel')}
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={fieldErrors.password}
       />
       <Input
-        label="닉네임"
+        label={t('auth.signup.nicknameLabel')}
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         error={fieldErrors.nickname}
       />
       {signupMutation.isError && <ErrorMessage message={getErrorMessage(signupMutation.error)} />}
       <Button type="submit" fullWidth disabled={signupMutation.isPending}>
-        {signupMutation.isPending ? '가입 처리 중...' : '가입하기'}
+        {signupMutation.isPending ? t('auth.signup.submitting') : t('auth.signup.submit')}
       </Button>
       <div className="auth-card__footer">
-        이미 계정이 있으신가요? <Link to="/login">로그인 하기</Link>
+        {t('auth.signup.footerQuestion')} <Link to="/login">{t('auth.signup.footerLink')}</Link>
       </div>
     </form>
   );

@@ -5,8 +5,10 @@ import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { useUpdatePasswordMutation } from '@/features/account/hooks/useUpdatePasswordMutation';
 import { validatePasswordForm, type PasswordFormErrors } from '@/features/account/lib/validateAccountForm';
 import { getErrorMessage } from '@/lib/errorUtils';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function PasswordForm() {
+  const { t } = useTranslation();
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
   const [fieldErrors, setFieldErrors] = useState<PasswordFormErrors>({});
@@ -18,7 +20,7 @@ export function PasswordForm() {
     setSuccessMessage(null);
 
     if (!newPassword) {
-      setFieldErrors({ newPassword: '새 비밀번호를 입력해주세요.' });
+      setFieldErrors({ newPassword: t('account.password.required') });
       return;
     }
 
@@ -28,7 +30,7 @@ export function PasswordForm() {
 
     updatePasswordMutation.mutate(newPassword, {
       onSuccess: () => {
-        setSuccessMessage('비밀번호가 저장되었습니다.');
+        setSuccessMessage(t('account.password.success'));
         setNewPassword('');
         setNewPasswordConfirm('');
       },
@@ -38,14 +40,14 @@ export function PasswordForm() {
   return (
     <form className="account-form" onSubmit={handleSubmit} noValidate>
       <Input
-        label="새 비밀번호"
+        label={t('account.password.label')}
         type="password"
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         error={fieldErrors.newPassword}
       />
       <Input
-        label="새 비밀번호 확인"
+        label={t('account.password.confirmLabel')}
         type="password"
         value={newPasswordConfirm}
         onChange={(e) => setNewPasswordConfirm(e.target.value)}
@@ -58,7 +60,7 @@ export function PasswordForm() {
         <p className="account-form__success">{successMessage}</p>
       )}
       <Button type="submit" disabled={updatePasswordMutation.isPending}>
-        {updatePasswordMutation.isPending ? '저장 중...' : '비밀번호 저장'}
+        {updatePasswordMutation.isPending ? t('account.password.saving') : t('account.password.submit')}
       </Button>
     </form>
   );

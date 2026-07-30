@@ -1,11 +1,16 @@
 import type { ApiError } from '@/types/api';
+import { useLocaleStore } from '@/features/locale/useLocaleStore';
+import { translate } from '@/lib/i18n/useTranslation';
 
-export function getErrorMessage(error: unknown, fallback = '요청 처리 중 오류가 발생했습니다.'): string {
+export function getErrorMessage(error: unknown, fallback?: string): string {
+  const locale = useLocaleStore.getState().locale;
+  const resolvedFallback = fallback ?? translate(locale, 'common.genericError');
+
   if (isApiError(error)) {
-    if (error.statusCode === 404) return '존재하지 않는 항목입니다.';
-    return error.message || fallback;
+    if (error.statusCode === 404) return translate(locale, 'common.notFound');
+    return error.message || resolvedFallback;
   }
-  return fallback;
+  return resolvedFallback;
 }
 
 function isApiError(e: unknown): e is ApiError {

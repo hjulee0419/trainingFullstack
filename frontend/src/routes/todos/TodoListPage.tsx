@@ -3,8 +3,10 @@ import { TodoList } from '@/features/todos/components/TodoList';
 import { Pagination } from '@/features/todos/components/Pagination';
 import { useTodoFilterStore } from '@/features/todos/store/useTodoFilterStore';
 import { useTodosQuery } from '@/features/todos/hooks/useTodosQuery';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export function TodoListPage() {
+  const { t } = useTranslation();
   const categoryId = useTodoFilterStore((state) => state.categoryId);
   const status = useTodoFilterStore((state) => state.status);
   const page = useTodoFilterStore((state) => state.page);
@@ -15,7 +17,7 @@ export function TodoListPage() {
 
   return (
     <div className="todo-page">
-      <h1 className="todo-page__title">할일 목록</h1>
+      <h1 className="todo-page__title">{t('todo.page.listTitle')}</h1>
       <TodoFilterBar />
       <TodoList
         items={data?.items ?? []}
