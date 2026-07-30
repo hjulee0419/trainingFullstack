@@ -3,16 +3,18 @@
 // FE-5 완료조건 3의 전제: createTodo/updateTodo가 올바른 엔드포인트/payload로 요청하는지 확인한다.
 import { describe, expect, it, vi } from 'vitest';
 
+// FE-6 완료조건 1의 전제: deleteTodo가 올바른 엔드포인트로 DELETE 요청을 보내는지 확인한다.
 vi.mock('@/api/client', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 import { apiClient } from '@/api/client';
-import { createTodo, getTodos, updateTodo } from '@/features/todos/api/todoApi';
+import { createTodo, deleteTodo, getTodos, updateTodo } from '@/features/todos/api/todoApi';
 import type { Todo, TodoListResponse } from '@/features/todos/types';
 
 const mockTodo: Todo = {
@@ -69,5 +71,16 @@ describe('todoApi.updateTodo', () => {
 
     expect(apiClient.patch).toHaveBeenCalledWith('/todos/1', req);
     expect(result).toEqual(mockTodo);
+  });
+});
+
+describe('todoApi.deleteTodo', () => {
+  it('/todos/:id에 DELETE 요청을 보낸다', async () => {
+    vi.mocked(apiClient.delete).mockResolvedValueOnce({ data: undefined });
+
+    const result = await deleteTodo('1');
+
+    expect(apiClient.delete).toHaveBeenCalledWith('/todos/1');
+    expect(result).toBeUndefined();
   });
 });

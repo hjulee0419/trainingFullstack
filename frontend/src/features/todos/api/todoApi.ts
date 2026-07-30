@@ -25,3 +25,7 @@ export function createTodo(req: CreateTodoRequest): Promise<Todo> {
 export function updateTodo(id: string, req: UpdateTodoRequest): Promise<Todo> {
   return apiClient.patch<Todo>(`/todos/${id}`, req).then((res) => res.data);
 }
+
+export function deleteTodo(id: string): Promise<void> {
+  return apiClient.delete<void>(`/todos/${id}`).then(() => undefined);
+}

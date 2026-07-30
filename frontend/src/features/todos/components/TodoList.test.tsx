@@ -3,15 +3,23 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TodoList } from '@/features/todos/components/TodoList';
 import type { Todo } from '@/features/todos/types';
 import type { ComponentProps } from 'react';
 
+// FE-6에서 TodoListItem이 완료 토글/삭제 mutation 훅(useQueryClient)을 사용하도록 변경되어,
+// TodoList를 통해 렌더링되는 항목도 QueryClientProvider 컨텍스트가 필요하다.
 function renderTodoList(props: ComponentProps<typeof TodoList>) {
+  const queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+  });
   return render(
-    <MemoryRouter>
-      <TodoList {...props} />
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <TodoList {...props} />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
