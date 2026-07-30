@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/shared/layout/ProtectedRoute';
 import { LoginPage } from '@/routes/auth/LoginPage';
 import { SignupPage } from '@/routes/auth/SignupPage';
 import { CategoryManagePage } from '@/routes/categories/CategoryManagePage';
+import { AccountPage } from '@/routes/account/AccountPage';
 import { TodoListPage } from '@/routes/todos/TodoListPage';
 import { TodoCreatePage } from '@/routes/todos/TodoCreatePage';
 import { TodoEditPage } from '@/routes/todos/TodoEditPage';
@@ -32,6 +33,7 @@ function App() {
           <Route path="/todos/new" element={<TodoCreatePage />} />
           <Route path="/todos/:id/edit" element={<TodoEditPage />} />
           <Route path="/categories" element={<CategoryManagePage />} />
+          <Route path="/account" element={<AccountPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/todos" replace />} />
