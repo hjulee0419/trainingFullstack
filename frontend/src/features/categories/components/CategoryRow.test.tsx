@@ -90,6 +90,20 @@ describe('CategoryRow', () => {
     expect(deleteCategory).toHaveBeenCalledWith(customCategory.id, expect.anything());
   });
 
+  it('수정 취소 시 편집 모드가 닫히고 updateCategory는 호출되지 않는다', async () => {
+    const user = userEvent.setup();
+    renderCategoryRow(customCategory);
+
+    await user.click(screen.getByRole('button', { name: '수정' }));
+    await screen.findByDisplayValue('과제');
+
+    await user.click(screen.getByRole('button', { name: '취소' }));
+
+    expect(screen.queryByDisplayValue('과제')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '수정' })).toBeInTheDocument();
+    expect(updateCategory).not.toHaveBeenCalled();
+  });
+
   it('수정 버튼 클릭 시 인라인 편집 입력창이 노출되고, 이름 변경 후 저장하면 updateCategory가 새 이름으로 호출된다', async () => {
     vi.mocked(updateCategory).mockResolvedValueOnce({ ...customCategory, name: '스터디' });
     const user = userEvent.setup();

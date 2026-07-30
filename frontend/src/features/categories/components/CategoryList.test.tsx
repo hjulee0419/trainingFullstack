@@ -52,6 +52,22 @@ describe('CategoryList', () => {
     vi.mocked(getCategories).mockReset();
   });
 
+  it('목록 조회 실패 시 에러 메시지를 표시한다', async () => {
+    vi.mocked(getCategories).mockRejectedValueOnce({ statusCode: 500, message: '서버 오류' });
+
+    renderCategoryList();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('서버 오류');
+  });
+
+  it('카테고리가 없으면 빈 상태 메시지를 표시한다', async () => {
+    vi.mocked(getCategories).mockResolvedValueOnce([]);
+
+    renderCategoryList();
+
+    expect(await screen.findByText('등록된 카테고리가 없습니다.')).toBeInTheDocument();
+  });
+
   it('기본 카테고리에는 수정/삭제 버튼이 없고, 일반 카테고리에는 있다', async () => {
     vi.mocked(getCategories).mockResolvedValueOnce(categories);
 

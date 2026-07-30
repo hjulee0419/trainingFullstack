@@ -56,6 +56,44 @@ describe('CategoryForm', () => {
     expect(input).toHaveValue('');
   });
 
+  it('빈 이름으로 제출하면 createCategory가 호출되지 않는다', async () => {
+    const user = userEvent.setup();
+    renderCategoryForm();
+
+    await user.click(screen.getByRole('button', { name: '추가' }));
+
+    expect(createCategory).not.toHaveBeenCalled();
+  });
+
+  it('제출 중에는 버튼에 진행 상태 문구가 표시된다', async () => {
+    let resolveCreate: (value: Category) => void = () => {};
+    vi.mocked(createCategory).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveCreate = resolve;
+        }),
+    );
+
+    const user = userEvent.setup();
+    renderCategoryForm();
+
+    await user.type(screen.getByLabelText('새 카테고리 이름'), '스터디');
+    await user.click(screen.getByRole('button', { name: '추가' }));
+
+    expect(await screen.findByRole('button', { name: '추가 중...' })).toBeInTheDocument();
+
+    resolveCreate({
+      id: '3',
+      name: '스터디',
+      isDefault: false,
+      ownerId: '1',
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    });
+
+    await screen.findByRole('button', { name: '추가' });
+  });
+
   it('이름 중복(409) 에러 시 에러 메시지가 표시된다', async () => {
     const errorMessage = '이미 존재하는 카테고리 이름입니다.';
     vi.mocked(createCategory).mockRejectedValueOnce({ statusCode: 409, message: errorMessage });
