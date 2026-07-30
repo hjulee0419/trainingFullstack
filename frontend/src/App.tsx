@@ -6,6 +6,8 @@ import { LoginPage } from '@/routes/auth/LoginPage';
 import { SignupPage } from '@/routes/auth/SignupPage';
 import { CategoryManagePage } from '@/routes/categories/CategoryManagePage';
 import { TodoListPage } from '@/routes/todos/TodoListPage';
+import { TodoCreatePage } from '@/routes/todos/TodoCreatePage';
+import { TodoEditPage } from '@/routes/todos/TodoEditPage';
 import { onUnauthorized } from '@/lib/authEvents';
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/todos" element={<TodoListPage />} />
+          <Route path="/todos/new" element={<TodoCreatePage />} />
+          <Route path="/todos/:id/edit" element={<TodoEditPage />} />
           <Route path="/categories" element={<CategoryManagePage />} />
         </Route>
       </Route>
