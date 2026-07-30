@@ -28,7 +28,7 @@ export function UserMenu() {
   return (
     <div className="user-menu" ref={containerRef}>
       <button type="button" className="user-menu__trigger" onClick={() => setIsOpen((prev) => !prev)}>
-        {user?.nickname ?? ''} ▾
+        <span>{user?.nickname ?? ''}</span> ▾
       </button>
       {isOpen && (
         <div className="user-menu__dropdown">

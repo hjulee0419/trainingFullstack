@@ -23,7 +23,7 @@ export function Input({
   const inputId = id ?? generatedId;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', width: '100%' }}>
       {label && (
         <label
           htmlFor={inputId}
@@ -43,6 +43,7 @@ export function Input({
         onChange={onChange}
         placeholder={placeholder}
         style={{
+          width: '100%',
           height: 36,
           borderRadius: 'var(--radius-sm)',
           border: `1px solid ${error ? 'var(--color-danger)' : 'var(--color-gray-300)'}`,

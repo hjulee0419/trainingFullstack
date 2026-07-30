@@ -94,6 +94,7 @@ body {
   font-weight: var(--font-body-weight);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 h1,
@@ -290,6 +291,19 @@ select {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2);
+  max-width: 140px;
+}
+
+.user-menu__trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .user-menu__trigger {
+    max-width: 96px;
+  }
 }
 
 .user-menu__dropdown {
@@ -619,6 +633,11 @@ select {
   line-height: var(--font-caption-line-height);
   color: var(--color-gray-500);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .todo-list-item__checkbox {
@@ -718,6 +737,10 @@ select {
 
   .todo-list-item__row {
     flex-wrap: wrap;
+  }
+
+  .todo-list-item__category {
+    max-width: 96px;
   }
 
   .todo-list-item__title {
