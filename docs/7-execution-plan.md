@@ -246,12 +246,12 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: 없음(최우선 착수, 백엔드 무관)
 
 **완료 조건**
-- [ ] `npm run dev` 정상 기동, `tsc --noEmit`/`eslint` 통과
-- [ ] `QueryClientProvider`/`BrowserRouter` 구성 및 라우팅 확인
-- [ ] 요청 인터셉터의 토큰 자동 부착 단위 확인
-- [ ] `ProtectedRoute`가 미인증 시 `/login`으로 리다이렉트
-- [ ] 공통 컴포넌트(Loading/Error/Empty) 렌더링 확인
-- [ ] Vitest 샘플 테스트 통과
+- [x] `npm run dev` 정상 기동, `tsc --noEmit`/`eslint` 통과
+- [x] `QueryClientProvider`/`BrowserRouter` 구성 및 라우팅 확인
+- [x] 요청 인터셉터의 토큰 자동 부착 단위 확인
+- [x] `ProtectedRoute`가 미인증 시 `/login`으로 리다이렉트
+- [x] 공통 컴포넌트(Loading/Error/Empty) 렌더링 확인
+- [x] Vitest 샘플 테스트 통과
 
 ### FE-2. 인증 화면 (FR-1, FR-2)
 **작업 내용**: `authApi`, `useSignupMutation`/`useLoginMutation`, `useAuthStore`(localStorage 캡슐화), `LoginForm`/`SignupForm`, `routes/auth/*`
@@ -259,11 +259,11 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: FE-1 완료 필요. **BE-2(인증 API) 완성 필요** — 스펙 합의 시 Mock으로 선행 가능.
 
 **완료 조건**
-- [ ] 회원가입 폼 클라이언트 측 검증(이메일 형식/필수값) 동작
-- [ ] 로그인 성공 시 토큰 저장 + `/todos` 리다이렉트
-- [ ] 로그인 실패 시 일반화 메시지 표시(E-8)
-- [ ] 로그아웃 시 토큰 삭제 + `/login` 이동
-- [ ] 401 응답 시 자동 로그아웃+리다이렉트(FE-1 인터셉터 연동)
+- [x] 회원가입 폼 클라이언트 측 검증(이메일 형식/필수값) 동작
+- [x] 로그인 성공 시 토큰 저장 + `/todos` 리다이렉트
+- [x] 로그인 실패 시 일반화 메시지 표시(E-8)
+- [x] 로그아웃 시 토큰 삭제 + `/login` 이동
+- [x] 401 응답 시 자동 로그아웃+리다이렉트(FE-1 인터셉터 연동)
 
 ### FE-3. 카테고리 관리 화면 (FR-8 Must / FR-9 Should)
 **작업 내용**: `categoryApi`, CRUD 훅, `CategoryList`/`CategoryForm`, 기본 카테고리 수정/삭제 UI 비노출, 삭제 컨펌+이관 안내 문구
@@ -271,11 +271,11 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: FE-1, FE-2 필요. **BE-3(카테고리 API) 필요** — Mock 선행 가능. FE-4/FE-5보다 먼저 착수 권장.
 
 **완료 조건**
-- [ ] 생성 시 목록 즉시 반영
-- [ ] 기본 카테고리에 수정/삭제 UI 미노출
-- [ ] 삭제 컨펌 다이얼로그 및 API 호출 확인
-- [ ] 이름 수정 후 목록 반영
-- [ ] (Should) 여력 없으면 생성만으로 축소 가능
+- [x] 생성 시 목록 즉시 반영
+- [x] 기본 카테고리에 수정/삭제 UI 미노출
+- [x] 삭제 컨펌 다이얼로그 및 API 호출 확인
+- [x] 이름 수정 후 목록 반영
+- [x] (Should) 여력 없으면 생성만으로 축소 가능 (전체 구현됨, 해당 없음)
 
 ### FE-4. 할일 목록 화면 (FR-5)
 **작업 내용**: `todoApi.getTodos`, `useTodosQuery`, `useTodoFilterStore`, `TodoFilterBar`(AND 필터), `TodoList`/`TodoListItem`/`TodoStatusBadge`, `buildTodoQueryParams`, 최소 페이지네이션 UI
@@ -283,11 +283,11 @@ FE-1(프로젝트 세팅) → FE-2(인증 화면) → FE-3(카테고리 화면) 
 **의존성**: FE-1, FE-2, FE-3 필요. **BE-5(목록 조회 API) 필요** — 응답 스키마 확정 시 Mock 선행 가능. **이후 FE-5/FE-6이 재사용하는 병목 Task, 최우선 진행**
 
 **완료 조건**
-- [ ] 카테고리+상태 동시 선택 시 AND 필터링 확인
-- [ ] 필터 상태(Zustand) 변경 시 쿼리 재요청 확인
-- [ ] 완료 항목은 기한초과 무관 '완료' 뱃지(E-6)
-- [ ] 빈 목록/로딩/에러 각각 공통 컴포넌트 노출
-- [ ] 페이지네이션(개수 제한) UI 동작
+- [x] 카테고리+상태 동시 선택 시 AND 필터링 확인
+- [x] 필터 상태(Zustand) 변경 시 쿼리 재요청 확인
+- [x] 완료 항목은 기한초과 무관 '완료' 뱃지(E-6)
+- [x] 빈 목록/로딩/에러 각각 공통 컴포넌트 노출
+- [x] 페이지네이션(개수 제한) UI 동작
 
 ### FE-5. 할일 등록/수정 화면 (FR-4, FR-6)
 **작업 내용**: `TodoForm`(공용), `DateRangePicker`, `validateTodoForm` 순수 함수, 생성/수정 mutation, 제출 성공 시 목록 이동+invalidate
