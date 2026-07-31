@@ -1,3 +1,7 @@
+# test, playwright-mcp
+.playwright-mcp/
+test/e2e
+
 # Logs
 logs
 *.log
