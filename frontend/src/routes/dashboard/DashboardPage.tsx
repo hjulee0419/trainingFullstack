@@ -68,45 +68,47 @@ export function DashboardPage() {
     <div className="dashboard-page">
       <h1 className="dashboard-page__title">{t('dashboard.title')}</h1>
 
-      <div className="dashboard-calendar">
-        <div className="dashboard-calendar__header">
-          <Button variant="secondary" type="button" onClick={() => goToMonth(-1)}>
-            {t('dashboard.calendar.prevMonth')}
-          </Button>
-          <span className="dashboard-calendar__month-title">
-            {t('dashboard.calendar.monthTitle', { year: viewYear, month: viewMonth })}
-          </span>
-          <Button variant="secondary" type="button" onClick={() => goToMonth(1)}>
-            {t('dashboard.calendar.nextMonth')}
-          </Button>
-          <Button variant="secondary" type="button" onClick={goToToday}>
-            {t('dashboard.calendar.today')}
-          </Button>
+      <div className="dashboard-body">
+        <div className="dashboard-calendar">
+          <div className="dashboard-calendar__header">
+            <Button variant="secondary" type="button" onClick={() => goToMonth(-1)}>
+              {t('dashboard.calendar.prevMonth')}
+            </Button>
+            <span className="dashboard-calendar__month-title">
+              {t('dashboard.calendar.monthTitle', { year: viewYear, month: viewMonth })}
+            </span>
+            <Button variant="secondary" type="button" onClick={() => goToMonth(1)}>
+              {t('dashboard.calendar.nextMonth')}
+            </Button>
+            <Button variant="secondary" type="button" onClick={goToToday}>
+              {t('dashboard.calendar.today')}
+            </Button>
+          </div>
+
+          {isLoading && <p className="dashboard-page__notice">{t('common.loading')}</p>}
+          {isError && <p className="dashboard-page__notice">{t('common.genericError')}</p>}
+          {!isLoading && !isError && (
+            <CalendarGrid
+              weeks={weeks}
+              todosByDate={todosByDate}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
+          )}
         </div>
 
-        {isLoading && <p className="dashboard-page__notice">{t('common.loading')}</p>}
-        {isError && <p className="dashboard-page__notice">{t('common.genericError')}</p>}
-        {!isLoading && !isError && (
-          <CalendarGrid
-            weeks={weeks}
-            todosByDate={todosByDate}
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
+        <section className="dashboard-selected-day">
+          <h2 className="dashboard-selected-day__title">
+            {t('dashboard.selectedDay.title', { date: selectedDate })}
+          </h2>
+          <TodoList
+            items={selectedDayTodos}
+            isLoading={false}
+            isError={isError}
+            error={error}
           />
-        )}
+        </section>
       </div>
-
-      <section className="dashboard-selected-day">
-        <h2 className="dashboard-selected-day__title">
-          {t('dashboard.selectedDay.title', { date: selectedDate })}
-        </h2>
-        <TodoList
-          items={selectedDayTodos}
-          isLoading={false}
-          isError={isError}
-          error={error}
-        />
-      </section>
     </div>
   );
 }

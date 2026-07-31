@@ -639,7 +639,7 @@ select {
 
 /* 대시보드(달력) 화면 */
 .dashboard-page {
-  max-width: 960px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4);
   display: flex;
@@ -659,7 +659,15 @@ select {
   color: var(--color-gray-700);
 }
 
+.dashboard-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
 .dashboard-calendar {
+  flex: 2;
+  min-width: 0;
   background-color: var(--color-white);
   border: 1px solid var(--color-gray-300);
   border-radius: var(--radius-md);
@@ -761,6 +769,8 @@ select {
 }
 
 .dashboard-selected-day {
+  flex: 1;
+  min-width: 280px;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -770,6 +780,17 @@ select {
   font-size: var(--font-h2-size);
   font-weight: var(--font-h2-weight);
   color: var(--color-gray-900);
+}
+
+@media (max-width: 1023px) {
+  .dashboard-body {
+    flex-direction: column;
+  }
+
+  .dashboard-selected-day {
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 767px) {
