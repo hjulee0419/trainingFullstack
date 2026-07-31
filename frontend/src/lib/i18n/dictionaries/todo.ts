@@ -41,6 +41,15 @@ export const todo = {
     'todo.validation.startDateRequired': '시작일을 입력해주세요.',
     'todo.validation.endDateRequired': '종료일을 입력해주세요.',
     'todo.validation.endDateBeforeStart': '종료일자는 시작일자보다 빠를 수 없습니다.',
+
+    'todo.statusSettings.title': '상태 표시 설정',
+    'todo.statusSettings.description':
+      '시작 전/진행중/완료/기한초과 4개 상태는 날짜와 완료 여부로 자동 계산되며, 이름과 색상만 원하는 대로 바꿀 수 있습니다.',
+    'todo.statusSettings.labelInputLabel': '{label} 표시 이름',
+    'todo.statusSettings.bgColorInputLabel': '{label} 배경색',
+    'todo.statusSettings.textColorInputLabel': '{label} 글자색',
+    'todo.statusSettings.resetOne': '초기화',
+    'todo.statusSettings.resetAll': '전체 초기화',
   },
   en: {
     'todo.status.notStarted': 'Not Started',
@@ -84,5 +93,14 @@ export const todo = {
     'todo.validation.startDateRequired': 'Please enter a start date.',
     'todo.validation.endDateRequired': 'Please enter an end date.',
     'todo.validation.endDateBeforeStart': 'The end date cannot be earlier than the start date.',
+
+    'todo.statusSettings.title': 'Status Display Settings',
+    'todo.statusSettings.description':
+      'The 4 statuses (Not Started/In Progress/Completed/Overdue) are always calculated automatically from dates and completion — you can only customize their name and color.',
+    'todo.statusSettings.labelInputLabel': '{label} display name',
+    'todo.statusSettings.bgColorInputLabel': '{label} background color',
+    'todo.statusSettings.textColorInputLabel': '{label} text color',
+    'todo.statusSettings.resetOne': 'Reset',
+    'todo.statusSettings.resetAll': 'Reset All',
   },
 } as const;

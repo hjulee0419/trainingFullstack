@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { NicknameForm } from '@/features/account/components/NicknameForm';
 import { PasswordForm } from '@/features/account/components/PasswordForm';
+import { StatusDisplaySettings } from '@/features/todos/components/StatusDisplaySettings';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
 function formatCreatedAt(createdAt: string): string {
@@ -48,6 +49,12 @@ export function AccountPage() {
       <section className="account-page__section">
         <h2 className="account-page__subtitle">{t('account.page.passwordSectionTitle')}</h2>
         <PasswordForm />
+      </section>
+
+      <section className="account-page__section">
+        <h2 className="account-page__subtitle">{t('todo.statusSettings.title')}</h2>
+        <p className="account-page__field-label">{t('todo.statusSettings.description')}</p>
+        <StatusDisplaySettings />
       </section>
     </div>
   );

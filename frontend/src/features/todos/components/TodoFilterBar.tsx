@@ -1,17 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { useCategoriesQuery } from '@/features/categories/hooks/useCategoriesQuery';
 import { useTodoFilterStore } from '@/features/todos/store/useTodoFilterStore';
+import { useStatusDisplay } from '@/features/todos/hooks/useStatusDisplay';
+import { STATUS_ORDER } from '@/features/todos/lib/statusDisplayDefaults';
 import { Button } from '@/shared/components/Button';
 import { useTranslation } from '@/lib/i18n/useTranslation';
-import type { TranslationKey } from '@/lib/i18n/translations';
 import type { TodoStatus } from '@/features/todos/types';
 
-const statusOptions: { value: TodoStatus; labelKey: TranslationKey }[] = [
-  { value: 'not_started', labelKey: 'todo.status.notStarted' },
-  { value: 'in_progress', labelKey: 'todo.status.inProgress' },
-  { value: 'completed', labelKey: 'todo.status.completed' },
-  { value: 'overdue', labelKey: 'todo.status.overdue' },
-];
+function StatusOption({ status }: { status: TodoStatus }) {
+  const { label } = useStatusDisplay(status);
+  return <option value={status}>{label}</option>;
+}
 
 export function TodoFilterBar() {
   const navigate = useNavigate();
@@ -54,10 +53,8 @@ export function TodoFilterBar() {
             onChange={(e) => setStatus((e.target.value || undefined) as TodoStatus | undefined)}
           >
             <option value="">{t('todo.filter.allOption')}</option>
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {t(option.labelKey)}
-              </option>
+            {STATUS_ORDER.map((s) => (
+              <StatusOption key={s} status={s} />
             ))}
           </select>
         </div>
