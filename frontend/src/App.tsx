@@ -6,6 +6,7 @@ import { LoginPage } from '@/routes/auth/LoginPage';
 import { SignupPage } from '@/routes/auth/SignupPage';
 import { CategoryManagePage } from '@/routes/categories/CategoryManagePage';
 import { AccountPage } from '@/routes/account/AccountPage';
+import { DashboardPage } from '@/routes/dashboard/DashboardPage';
 import { TodoListPage } from '@/routes/todos/TodoListPage';
 import { TodoCreatePage } from '@/routes/todos/TodoCreatePage';
 import { TodoEditPage } from '@/routes/todos/TodoEditPage';
@@ -35,6 +36,7 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/todos" element={<TodoListPage />} />
           <Route path="/todos/new" element={<TodoCreatePage />} />
           <Route path="/todos/:id/edit" element={<TodoEditPage />} />
@@ -42,7 +44,7 @@ function App() {
           <Route path="/account" element={<AccountPage />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/todos" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

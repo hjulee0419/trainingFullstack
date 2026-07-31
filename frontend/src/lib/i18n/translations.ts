@@ -3,6 +3,7 @@ import { auth } from '@/lib/i18n/dictionaries/auth';
 import { category } from '@/lib/i18n/dictionaries/category';
 import { todo } from '@/lib/i18n/dictionaries/todo';
 import { account } from '@/lib/i18n/dictionaries/account';
+import { dashboard } from '@/lib/i18n/dictionaries/dashboard';
 
 export const translations = {
   ko: {
@@ -11,6 +12,7 @@ export const translations = {
     ...category.ko,
     ...todo.ko,
     ...account.ko,
+    ...dashboard.ko,
   },
   en: {
     ...common.en,
@@ -18,6 +20,7 @@ export const translations = {
     ...category.en,
     ...todo.en,
     ...account.en,
+    ...dashboard.en,
   },
 } as const;
 

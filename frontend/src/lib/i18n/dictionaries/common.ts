@@ -1,5 +1,6 @@
 export const common = {
   ko: {
+    'common.nav.dashboard': '대시보드',
     'common.nav.todos': '할일 목록',
     'common.nav.categories': '카테고리',
     'common.nav.account': '계정',
@@ -19,6 +20,7 @@ export const common = {
     'common.localeToggle.label': '언어 전환',
   },
   en: {
+    'common.nav.dashboard': 'Dashboard',
     'common.nav.todos': 'Todos',
     'common.nav.categories': 'Categories',
     'common.nav.account': 'Account',

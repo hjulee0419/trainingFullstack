@@ -10,6 +10,7 @@ export function AppLayout() {
   const { t } = useTranslation();
 
   const navItems = [
+    { to: '/dashboard', label: t('common.nav.dashboard') },
     { to: '/todos', label: t('common.nav.todos') },
     { to: '/categories', label: t('common.nav.categories') },
     { to: '/account', label: t('common.nav.account') },
@@ -23,7 +24,7 @@ export function AppLayout() {
     <div>
       <header className="gnb">
         <div className="gnb-left">
-          <NavLink to="/todos" className="gnb-logo">
+          <NavLink to="/dashboard" className="gnb-logo">
             TodoList
           </NavLink>
           <nav className="gnb-desktop-menu">
