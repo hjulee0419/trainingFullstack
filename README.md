@@ -12,11 +12,11 @@
 | 구성요소 | URL | 비고 |
 |---|---|---|
 | 백엔드 | https://lhj-be.vercel.app/api/v1 | Vercel 배포, DB는 Supabase `todolist` 프로젝트(ap-northeast-2, project_id `qxkymonahreumvgnqeoj`)에 연결됨 |
-| 프론트엔드 | _(배포 URL 기입 필요)_ | Vercel 배포, `frontend/vercel.json`에 SPA fallback rewrite 설정됨 |
+| 프론트엔드 | https://lhj-fe.vercel.app | Vercel 배포, `frontend/vercel.json`에 SPA fallback rewrite 설정됨(딥링크/새로고침 정상 동작 확인됨) |
 | Health check | https://lhj-be.vercel.app/api/v1/health | DB 연결 상태 포함 |
 | Swagger UI | https://lhj-be.vercel.app/api/v1/docs (또는 로컬 실행 시 http://localhost:3000/api/v1/docs) | API 계약(`swagger/swagger.json`) 문서 |
 
-> 프론트엔드 배포 URL이 확정되면 이 표와 백엔드의 `CORS_ORIGIN`에 반영해야 합니다.
+> 백엔드의 `CORS_ORIGIN`(배포 환경변수)에 `https://lhj-fe.vercel.app`가 이미 등록되어 있습니다. 프론트엔드 배포 도메인이 바뀌면 함께 갱신해야 합니다.
 
 ## 다른 PC에서 이어서 작업/테스트하기
 

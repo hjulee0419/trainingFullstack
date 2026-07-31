@@ -30,4 +30,4 @@ npm run lint           # ESLint
 
 ## 배포
 
-Vercel 배포 시 `vercel.json`의 SPA fallback(모든 경로 → `index.html`)이 적용되어 있어야 딥링크/새로고침이 정상 동작합니다(React Router `BrowserRouter` 사용). Vercel 프로젝트 설정에서 `VITE_API_BASE_URL` 환경변수를 지정하고, 백엔드의 `CORS_ORIGIN`에 이 프론트엔드 배포 도메인이 등록되어 있는지 확인하세요.
+배포: https://lhj-fe.vercel.app. `vercel.json`의 SPA fallback(모든 경로 → `index.html`)이 적용되어 있어야 딥링크/새로고침이 정상 동작합니다(React Router `BrowserRouter` 사용). Vercel 프로젝트 설정에서 `VITE_API_BASE_URL` 환경변수를 지정하고(`.env.production` 참고), 백엔드의 `CORS_ORIGIN`에 이 도메인이 등록되어 있는지 확인하세요(현재 등록되어 있음).

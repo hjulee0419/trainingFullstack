@@ -43,4 +43,4 @@ npm test   # node:test 기반 단위+통합 테스트, 커버리지 리포트 �
 
 ## 배포
 
-Vercel에 배포되어 있습니다: https://lhj-be.vercel.app/api/v1 (DB: Supabase `todolist` 프로젝트). Vercel 프로젝트의 환경변수(`DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` 등)는 `.env`와 별개로 Vercel 대시보드에서 관리됩니다 — 프론트엔드 배포 도메인이 바뀌면 `CORS_ORIGIN`도 함께 갱신해야 합니다.
+Vercel에 배포되어 있습니다: https://lhj-be.vercel.app/api/v1 (DB: Supabase `todolist` 프로젝트). Vercel 프로젝트의 환경변수(`DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` 등)는 `.env`와 별개로 Vercel 대시보드에서 관리되며, `CORS_ORIGIN=https://lhj-fe.vercel.app`(배포된 프론트엔드 도메인)로 설정되어 있습니다 — 프론트엔드 배포 도메인이 바뀌면 이 값도 함께 갱신해야 합니다.
