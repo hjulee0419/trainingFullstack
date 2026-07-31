@@ -1,6 +1,8 @@
 // categoryApi는 FE-3 완료조건 1(생성)/3(삭제)/4(수정)이 실제로 호출하는 HTTP 계층이다.
 // apiClient의 get/post/patch/delete를 모킹하여 각 함수가 올바른 엔드포인트/페이로드로
 // 요청하고 응답 데이터를 그대로 반환하는지 검증한다.
+// createCategory는 카테고리 추가 시 백엔드와의 통신(요청/응답/에러)을 devLog로 남기는지도 검증한다
+// (개발 서버에서만 로그가 남고 production 빌드에서는 남지 않아야 한다는 요구사항의 근거).
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/api/client', () => ({
@@ -47,6 +49,32 @@ describe('categoryApi', () => {
 
     expect(apiClient.post).toHaveBeenCalledWith('/categories', { name: '과제' });
     expect(result).toEqual(category);
+  });
+
+  it('createCategory는 개발 환경에서 요청/응답을 콘솔에 로그로 남긴다', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: category });
+
+    await createCategory({ name: '과제' });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('request'),
+      expect.objectContaining({ name: '과제' }),
+    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('response'), category);
+
+    logSpy.mockRestore();
+  });
+
+  it('createCategory는 요청 실패 시 에러를 로그로 남기고 그대로 다시 던진다', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const apiError = { statusCode: 400, message: '이미 존재하는 카테고리입니다.' };
+    vi.mocked(apiClient.post).mockRejectedValueOnce(apiError);
+
+    await expect(createCategory({ name: '과제' })).rejects.toEqual(apiError);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('error'), apiError);
+
+    errorSpy.mockRestore();
   });
 
   it('updateCategory는 /categories/:id로 PATCH하고 응답 데이터를 반환한다', async () => {

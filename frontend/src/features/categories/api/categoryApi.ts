@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { devLog, devError } from '@/lib/devLog';
 import type { Category, CreateCategoryRequest, UpdateCategoryRequest } from '@/features/categories/types';
 
 export function getCategories(): Promise<Category[]> {
@@ -6,7 +7,18 @@ export function getCategories(): Promise<Category[]> {
 }
 
 export function createCategory(req: CreateCategoryRequest): Promise<Category> {
-  return apiClient.post<Category>('/categories', req).then((res) => res.data);
+  devLog('[categoryApi] POST /categories request', req);
+
+  return apiClient
+    .post<Category>('/categories', req)
+    .then((res) => {
+      devLog('[categoryApi] POST /categories response', res.data);
+      return res.data;
+    })
+    .catch((error) => {
+      devError('[categoryApi] POST /categories error', error);
+      throw error;
+    });
 }
 
 export function updateCategory(id: string, req: UpdateCategoryRequest): Promise<Category> {
