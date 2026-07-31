@@ -1,8 +1,10 @@
 # TodoList 프론트엔드 스타일 가이드
 
-버전: 1.0 / 작성일: 2026-07-30
+버전: 1.1 / 작성일: 2026-07-30 / 수정일: 2026-07-31
 
 참조: `4-project-structure.md`(8장 프론트엔드 디렉토리 구조, `styles/globals.css`), `8-wireframe.md`(S1~S7 화면 구조)
+
+> 1.1(2026-07-31): 실제 구현과의 정합성 점검 반영 — 6.10절의 day-color 토큰 적용 대상을 `DateRangePicker`(실제로는 네이티브 date input이라 미적용)에서 `CalendarGrid`(대시보드 달력, FR-16)로 정정. `globals.css`에 다크모드 토큰 오버라이드(`:root[data-theme='dark']`)가 추가되었으나, 라이트 모드 팔레트(3장)는 변경 없이 그대로 기본값으로 유지된다.
 
 ## 1. 문서 개요
 
@@ -75,8 +77,8 @@
 |---|---|---|
 | `--color-danger` | `#D92D20` | 삭제 버튼, 에러 메시지, 필수 표시(`*`) |
 | `--color-danger-bg` | `#FDECEC` | 에러 메시지 영역 배경 |
-| `--color-sunday` | `#D92D20` | `DateRangePicker` 일요일/공휴일 날짜 텍스트(참고 스크린샷의 요일별 의미색 규칙 채택) |
-| `--color-saturday` | `#1971C2` | `DateRangePicker` 토요일 날짜 텍스트 |
+| `--color-sunday` | `#D92D20` | `CalendarGrid`(대시보드 달력, FR-16) 일요일 요일 헤더/날짜 텍스트(참고 스크린샷의 요일별 의미색 규칙 채택) — `DateRangePicker`(할일 등록/수정 폼)는 네이티브 `<input type="date">`라 이 토큰이 적용되지 않음, 6.10절 참조 |
+| `--color-saturday` | `#1971C2` | `CalendarGrid`(대시보드 달력) 토요일 요일 헤더/날짜 텍스트 — 위와 동일한 이유로 `DateRangePicker`에는 미적용 |
 
 ## 4. 타이포그래피
 
@@ -143,10 +145,13 @@
 - **`LoadingSpinner`**: `--color-primary` 단색 스피너, 별도 배경 오버레이 없이 콘텐츠 영역 중앙에 인라인 배치.
 - **`ErrorMessage`**: `--color-danger-bg` 배경 + `--color-danger` 텍스트의 인라인 배너.
 
-### 6.10 날짜 강조 규칙 (`DateRangePicker`)
+### 6.10 날짜 강조 규칙 (`CalendarGrid` — 대시보드 달력, FR-16)
+> 이 절은 최초 계획 시점(FE-1~FE-10 착수 전)에는 할일 등록/수정 폼의 날짜 선택 UI(`DateRangePicker`)를 염두에 두고 작성되었으나, 실제로 `DateRangePicker`는 **네이티브 `<input type="date">` 2개**(시작일자/종료일자)로 구현되어 브라우저 기본 위젯을 그대로 사용하므로 아래 규칙이 적용되지 않는다(브라우저 기본 위젯은 CSS로 요일별 색상을 커스터마이징할 수 없음 — 2일 MVP 범위에서 의도적으로 커스텀 캘린더 팝업 대신 네이티브 입력을 선택한 트레이드오프). 아래 규칙은 MVP 이후 추가된 대시보드 화면의 `CalendarGrid.tsx`(`frontend/src/features/dashboard/components/CalendarGrid.tsx`)에 실제로 적용되어 있다.
+
 - 요일 헤더: 일요일 `--color-sunday`, 토요일 `--color-saturday`, 평일 `--color-gray-900`.
-- 오늘 날짜: `--color-primary-light` 배경 + `--color-primary` 텍스트로 강조.
-- 선택된 시작일/종료일: `--color-primary` 배경 + 흰색 텍스트, 그 사이 범위는 `--color-primary-light` 배경.
+- 오늘 날짜: 날짜 숫자를 굵게(bold) + 밑줄로 강조(`--color-primary-light` 배경/선택 강조와는 별도 표시).
+- 선택된 날짜: `--color-primary` 테두리 + `--color-primary-light` 배경으로 강조.
+- 날짜별 할일 표시는 시작일/종료일 배경색 대신, 그 날짜에 걸친 할일 개수만큼 상태색 점(dot, 최대 3개 + "+N")을 날짜 칸 하단에 배치하는 방식으로 구현되었다(참고 스크린샷의 "선택 범위 배경" 대신 "점 인디케이터" 패턴 채택 — 달력의 한 칸에 여러 할일이 겹칠 수 있는 TodoList 도메인 특성 반영).
 
 ## 7. 아이콘
 

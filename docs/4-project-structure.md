@@ -232,76 +232,101 @@ backend/
 
 ## 8. 프론트엔드 디렉토리 구조
 
+> 아래는 FE-1~FE-10(2일 MVP) 및 이후 사용자 요청으로 추가된 다국어/다크모드/대시보드(5.1절, FR-14~16) 구현까지 반영한 **실제 구조**다. 컴포넌트별 `*.test.ts(x)` 파일은 특별한 사정이 없는 한 구현 파일과 같은 디렉토리에 나란히 두므로 트리에서는 생략했다(예: `TodoForm.tsx` 옆에 `TodoForm.test.tsx`가 항상 존재).
+
 ```
 frontend/
 ├── src/
 │   ├── main.tsx                        # 엔트리포인트, QueryClientProvider/Router 셋업
-│   ├── App.tsx                         # 라우팅 정의
+│   ├── App.tsx                         # 라우팅 정의, data-theme 속성 적용, 401 이벤트 구독
+│   ├── App.test.tsx
 │   │
 │   ├── routes/                         # 페이지(라우트) 컴포넌트 — 기능 조합만 담당
 │   │   ├── auth/
 │   │   │   ├── LoginPage.tsx
 │   │   │   └── SignupPage.tsx
+│   │   ├── dashboard/
+│   │   │   └── DashboardPage.tsx       # FR-16: 기본 랜딩 화면, 월 달력 + 선택일 할일 목록
 │   │   ├── todos/
 │   │   │   ├── TodoListPage.tsx        # UC-5: 목록+필터
 │   │   │   ├── TodoCreatePage.tsx      # UC-4
-│   │   │   └── TodoEditPage.tsx        # UC-6
+│   │   │   └── TodoEditPage.tsx        # UC-6, location.state.todo로 프리필(단일 조회 API 없음)
 │   │   ├── categories/
 │   │   │   └── CategoryManagePage.tsx  # UC-8, UC-9
 │   │   └── account/
-│   │       ├── AccountViewPage.tsx     # FR-3: 조회/변경 2화면 — 조회 전용(읽기 전용 프로필)
-│   │       └── AccountEditPage.tsx     # FR-3: 조회/변경 2화면 — 비밀번호/닉네임 변경 폼
+│   │       └── AccountPage.tsx         # FR-3: 조회+닉네임/비밀번호 변경+상태 표시 설정을 한 화면에 통합
 │   │
 │   ├── features/                       # 기능(도메인) 단위 로직 — 1차 분리 기준
 │   │   ├── auth/
 │   │   │   ├── api/authApi.ts
 │   │   │   ├── hooks/{useLoginMutation,useSignupMutation}.ts
-│   │   │   ├── store/useAuthStore.ts   # Zustand: accessToken, user, isAuthenticated
+│   │   │   ├── store/useAuthStore.ts   # Zustand+persist: accessToken, user, isAuthenticated
 │   │   │   ├── components/{LoginForm,SignupForm}.tsx
+│   │   │   ├── lib/validateAuthForm.ts
 │   │   │   └── types.ts
 │   │   │
 │   │   ├── categories/
 │   │   │   ├── api/categoryApi.ts
 │   │   │   ├── hooks/{useCategoriesQuery,useCreateCategoryMutation,useUpdateCategoryMutation,useDeleteCategoryMutation}.ts
-│   │   │   ├── components/{CategoryList,CategoryForm}.tsx
+│   │   │   ├── components/{CategoryList,CategoryForm,CategoryRow}.tsx
 │   │   │   └── types.ts
 │   │   │
-│   │   └── todos/
-│   │       ├── api/todoApi.ts          # getTodos(params), createTodo, updateTodo, deleteTodo
-│   │       ├── hooks/{useTodosQuery,useTodoQuery,useCreateTodoMutation,useUpdateTodoMutation,useDeleteTodoMutation}.ts
-│   │       ├── store/useTodoFilterStore.ts   # Zustand: 선택된 categoryId, status
-│   │       ├── components/
-│   │       │   ├── TodoList.tsx
-│   │       │   ├── TodoListItem.tsx
-│   │       │   ├── TodoFilterBar.tsx       # 카테고리+상태 AND 필터 UI
-│   │       │   ├── TodoForm.tsx            # 등록/수정 공용 폼
-│   │       │   ├── DateRangePicker.tsx     # 캘린더 날짜 선택 UI
-│   │       │   └── TodoStatusBadge.tsx     # 파생 상태 뱃지 표시
-│   │       ├── lib/
-│   │       │   ├── deriveTodoStatus.ts     # 순수 함수 (테스트 1순위)
-│   │       │   ├── deriveTodoStatus.test.ts
-│   │       │   ├── validateTodoForm.ts     # 순수 함수 (테스트 2순위)
-│   │       │   ├── validateTodoForm.test.ts
-│   │       │   └── buildTodoQueryParams.ts # 필터 → 쿼리파라미터 변환
-│   │       └── types.ts
+│   │   ├── todos/
+│   │   │   ├── api/todoApi.ts          # getTodos(params), createTodo, updateTodo, deleteTodo
+│   │   │   ├── hooks/{useTodosQuery,useCreateTodoMutation,useUpdateTodoMutation,useDeleteTodoMutation,useToggleTodoCompleteMutation,useStatusDisplay}.ts
+│   │   │   ├── store/{useTodoFilterStore,useStatusDisplayStore}.ts  # 필터 상태 / FR-15: 상태별 라벨·색상 커스터마이징(Zustand+persist)
+│   │   │   ├── components/
+│   │   │   │   ├── TodoList.tsx
+│   │   │   │   ├── TodoListItem.tsx
+│   │   │   │   ├── TodoFilterBar.tsx       # 카테고리+상태 AND 필터 UI
+│   │   │   │   ├── TodoForm.tsx            # 등록/수정 공용 폼
+│   │   │   │   ├── DateRangePicker.tsx     # 네이티브 <input type="date"> 2개 조합(캘린더 팝업 아님)
+│   │   │   │   ├── TodoStatusBadge.tsx     # 파생 상태 뱃지(커스텀 라벨/색상 반영)
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   └── StatusDisplaySettings.tsx  # 상태 라벨/색상 커스터마이징 UI(계정 화면에 임베드)
+│   │   │   ├── lib/
+│   │   │   │   ├── deriveTodoStatus.ts     # 순수 함수 (테스트 1순위)
+│   │   │   │   ├── validateTodoForm.ts     # 순수 함수 (테스트 2순위)
+│   │   │   │   ├── buildTodoQueryParams.ts # 필터 → 쿼리파라미터 변환
+│   │   │   │   └── statusDisplayDefaults.ts # 상태별 기본 라벨 키/색상(토큰·hex) 상수
+│   │   │   └── types.ts
+│   │   │
+│   │   ├── account/
+│   │   │   ├── api/accountApi.ts
+│   │   │   ├── hooks/{useUpdateNicknameMutation,useUpdatePasswordMutation}.ts
+│   │   │   ├── components/{NicknameForm,PasswordForm}.tsx
+│   │   │   └── lib/validateAccountForm.ts
+│   │   │
+│   │   ├── dashboard/                  # FR-16: 대시보드 전용 순수 로직/컴포넌트
+│   │   │   ├── lib/{buildCalendarMatrix,getTodosForDate}.ts  # 순수 함수(달력 매트릭스 생성, 날짜별 할일 필터링)
+│   │   │   └── components/CalendarGrid.tsx
+│   │   │
+│   │   ├── theme/                      # FR-15: 다크 모드
+│   │   │   └── useThemeStore.ts        # Zustand+persist: theme('light'|'dark')
+│   │   │
+│   │   └── locale/                     # FR-14: 다국어
+│   │       └── useLocaleStore.ts       # Zustand+persist: locale('ko'|'en')
 │   │
 │   ├── shared/                         # 기능 간 공유 요소 (2곳 이상에서 쓰일 때만 승격)
-│   │   ├── components/{Button,Input,Modal,ConfirmDialog,LoadingSpinner,ErrorMessage,EmptyState}.tsx
-│   │   ├── hooks/useDebounce.ts
-│   │   └── layout/{AppLayout,ProtectedRoute}.tsx
+│   │   ├── components/{Button,Input,Modal,ConfirmDialog,LoadingSpinner,ErrorMessage,EmptyState,ErrorBoundary}.tsx
+│   │   └── layout/{AppLayout,ProtectedRoute,UserMenu,ThemeToggle,LocaleToggle}.tsx
 │   │
 │   ├── api/
-│   │   └── client.ts                   # axios 인스턴스, 요청/응답 인터셉터
+│   │   └── client.ts                   # axios 인스턴스, 요청/응답 인터셉터(401→emitUnauthorized, 네트워크 에러 다국어 매핑)
 │   │
 │   ├── lib/
-│   │   ├── date.ts
-│   │   └── errorUtils.ts               # getErrorMessage(error)
+│   │   ├── authEvents.ts               # emitUnauthorized/onUnauthorized 이벤트 버스(모듈 스코프 pub/sub)
+│   │   ├── errorUtils.ts               # getErrorMessage(error) — 다국어 매핑 포함
+│   │   └── i18n/                       # FR-14: 다국어 지원
+│   │       ├── translations.ts         # 도메인별 사전을 병합, TranslationKey 타입 도출
+│   │       ├── useTranslation.ts       # translate(locale,key,params) / useTranslation() 훅
+│   │       └── dictionaries/{common,auth,category,todo,account,dashboard}.ts  # 도메인별 ko/en 사전
 │   │
 │   ├── types/
 │   │   └── api.ts                      # ApiError, PaginatedResponse<T> 등
 │   │
 │   ├── styles/
-│   │   └── globals.css                 # 반응형 기본 브레이크포인트, CSS 변수
+│   │   └── globals.css                 # 디자인 토큰(:root) + 다크모드 오버라이드(:root[data-theme='dark']) + 반응형 브레이크포인트
 │   │
 │   └── test/
 │       └── setup.ts                    # Vitest + RTL 공통 셋업
