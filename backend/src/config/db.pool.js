@@ -4,8 +4,15 @@
 // 이 프로세스 전체에서 단 하나의 Pool 인스턴스만 생성/공유한다(재사용).
 // 값 근거는 각 옵션 옆 주석 참조. 최종 근거 요약은 backend/docs/db-handoff.md 참고.
 
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 const env = require('./env');
+
+// DATE OID(1082): pg의 기본 파서는 DATE 컬럼을 JS Date 객체로 변환하는데,
+// 이후 JSON 직렬화(toISOString) 시 서버 로컬 타임존 기준으로 UTC 환산되면서
+// 날짜가 하루 밀리는 문제가 생긴다(예: KST 자정 2026-08-01 → 2026-07-31T15:00:00.000Z).
+// todos.start_date/end_date는 순수 날짜 값이라 타임존 변환이 불필요하므로,
+// DB가 반환한 'YYYY-MM-DD' 문자열을 그대로 통과시킨다.
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
 let poolInstance = null;
 
