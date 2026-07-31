@@ -11,7 +11,7 @@ export function LoginPage() {
       <span className="auth-page__logo">TodoList</span>
       <div className="auth-card">
         <h1 className="auth-card__title">{t('auth.login.title')}</h1>
-        <LoginForm onSuccess={() => navigate('/todos', { replace: true })} />
+        <LoginForm onSuccess={() => navigate('/dashboard', { replace: true })} />
       </div>
     </div>
   );
