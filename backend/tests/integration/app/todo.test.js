@@ -165,6 +165,8 @@ test(
       assert.equal(res.body.title, '기본카테고리 할일');
       assert.ok(res.body.id !== undefined && res.body.id !== null);
       assert.equal(String(res.body.categoryId), String(userADefaultCategoryId));
+      // swagger Todo 스키마 계약: status는 등록 응답에도 항상 포함되어야 한다(findTodoByIdAndUserId 재조회 결과).
+      assert.equal(res.body.status, 'not_started');
 
       createdTodoId = res.body.id;
 
@@ -254,6 +256,8 @@ test(
 
       assert.equal(res.status, 200);
       assert.equal(res.body.title, '수정된 제목');
+      // swagger Todo 스키마 계약: status는 수정 응답에도 항상 포함되어야 한다(findTodoByIdAndUserId 재조회 결과).
+      assert.equal(res.body.status, 'not_started');
     });
 
     await t.test('완료조건 4: updated_at이 수정 전보다 갱신되었는지 확인', async () => {
@@ -286,6 +290,8 @@ test(
         Math.abs(Date.now() - new Date(res.body.completedAt).getTime()) < 10000,
         'completedAt은 현재 시각과 근접해야 한다'
       );
+      // E-6: 완료 처리 시 시작/종료일자와 무관하게 status는 항상 'completed'여야 한다.
+      assert.equal(res.body.status, 'completed');
     });
 
     await t.test('완료 해제: isCompleted=false로 PATCH 시 completedAt이 null로 초기화', async () => {
@@ -297,6 +303,8 @@ test(
       assert.equal(res.status, 200);
       assert.equal(res.body.isCompleted, false);
       assert.equal(res.body.completedAt, null);
+      // 완료 해제 후에는 다시 날짜 기준 파생 상태로 돌아가야 한다.
+      assert.equal(res.body.status, 'not_started');
 
       const rows = await pool.query('SELECT completed_at FROM todos WHERE id = $1', [createdTodoId]);
       assert.equal(rows.rows[0].completed_at, null);

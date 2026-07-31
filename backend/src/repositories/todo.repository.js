@@ -23,10 +23,21 @@ async function insertTodo(clientOrPool, { userId, categoryId, title, description
   return toCamelCase(result.rows[0]);
 }
 
+// 파생 상태(status) 계산식. findTodoByIdAndUserId/findTodosForUser가 동일한 규칙을 공유하도록 상수로 분리한다.
+const STATUS_CASE_SQL = `
+  CASE
+    WHEN t.is_completed THEN 'completed'
+    WHEN CURRENT_DATE < t.start_date THEN 'not_started'
+    WHEN CURRENT_DATE > t.end_date THEN 'overdue'
+    ELSE 'in_progress'
+  END
+`;
+
 async function findTodoByIdAndUserId(clientOrPool, todoId, userId) {
   const result = await clientOrPool.query(
     `SELECT t.id, t.user_id AS owner_id, t.category_id, c.name AS category_name, t.title,
-       t.description, t.start_date, t.end_date, t.is_completed, t.completed_at, t.created_at, t.updated_at
+       t.description, t.start_date, t.end_date, t.is_completed, t.completed_at, t.created_at, t.updated_at,
+       ${STATUS_CASE_SQL} AS status
      FROM todos t
      JOIN categories c ON c.id = t.category_id
      WHERE t.id = $1 AND t.user_id = $2`,
